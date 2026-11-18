@@ -7,7 +7,7 @@ Prérequis : Home Assistant 2024.11 ou plus récent. **Tous les plans** de Linki
 
 ## Installer
 
-1. **Dans Home Assistant** : copiez le dossier `custom_components/linkivi` dans le dossier `config/custom_components/` de Home Assistant, puis redémarrez Home Assistant.
+1. **Dans Home Assistant** : par HACS (menu ⋮ › Dépôts personnalisés › `https://github.com/zozo01220/ha-linkivi`, catégorie Intégration, une fois le dépôt public créé, voir `PUBLIER.md`), ou à la main : copiez le dossier `custom_components/linkivi` dans le dossier `config/custom_components/` de Home Assistant, puis redémarrez Home Assistant.
 2. Paramètres › Appareils et services › Ajouter une intégration › **Linkivi** › **Se connecter avec un code** : adresse de votre Linkivi (par exemple `https://linkivi.duckdns.org`).
 3. Home Assistant affiche un **lien** et un **code** (8 lettres, `WDJB-MJHT`), valable 10 minutes. Ouvrez le lien : Linkivi s'ouvre (connectez-vous si besoin), vérifiez que le code est le même, choisissez l'organisation si vous en gérez plusieurs, puis **Autoriser**.
 4. Home Assistant reçoit sa clé tout seul : les écrans apparaissent en quelques secondes.

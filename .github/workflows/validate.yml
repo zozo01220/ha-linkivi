@@ -1,0 +1,25 @@
+# Contrôles de Home Assistant et de HACS à chaque envoi et chaque version (§302).
+# Ce fichier ne tourne que dans le dépôt public zozo01220/ha-linkivi, dont ce dossier homeassistant/ est la racine.
+name: Validation
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
+  schedule:
+    - cron: "0 4 * * 1"
+
+jobs:
+  hassfest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hacs/action@main
+        with:
+          category: integration
