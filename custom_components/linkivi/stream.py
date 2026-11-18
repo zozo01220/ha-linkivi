@@ -129,6 +129,15 @@ class LinkivStream:
             coordinator.async_set_updated_data({k: v for k, v in (coordinator.data or {}).items() if k != data["id"]})
             return
 
+        # urgences en cours (capteur « Urgence en cours »)
+        emergency = data.get("emergency") or {}
+        if kind == "emergency.started" and emergency.get("id"):
+            coordinator.emergencies = {**coordinator.emergencies, emergency["id"]: emergency.get("title", "")}
+            coordinator.async_update_listeners()
+        elif kind == "emergency.ended" and emergency.get("id"):
+            coordinator.emergencies = {k: v for k, v in coordinator.emergencies.items() if k != emergency["id"]}
+            coordinator.async_update_listeners()
+
         # événements de Linkivi (écran hors ligne, de retour, nouvelle version affichée, urgence…) : sur le bus de Home Assistant
         screen_id = (data.get("screen") or {}).get("id")
         device_id = None

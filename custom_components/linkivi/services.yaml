@@ -49,3 +49,36 @@ clear_display:
       integration: linkivi
     device:
       integration: linkivi
+
+show_list:
+  target:
+    entity:
+      integration: linkivi
+    device:
+      integration: linkivi
+  fields:
+    playlist:
+      required: true
+      example: "Accueil"
+      selector:
+        text:
+
+start_emergency:
+  target:
+    entity:
+      integration: linkivi
+    device:
+      integration: linkivi
+  fields:
+    title:
+      required: true
+      example: "Évacuation"
+      selector:
+        text:
+    message:
+      example: "Quittez le bâtiment par les issues de secours."
+      selector:
+        text:
+          multiline: true
+
+end_emergency:

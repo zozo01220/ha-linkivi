@@ -150,3 +150,48 @@ class LinkivApi:
     async def clear_display(self, screen_id: str) -> dict[str, Any]:
         """Retire le message affiché : la diffusion reprend."""
         return await self._request("DELETE", f"/screens/{screen_id}/display")
+
+    # ---------- lot 2 (§301) : listes, aperçu du direct, urgence ----------
+
+    async def playlists(self) -> list[dict[str, Any]]:
+        """Listes de lecture de l'organisation (id, name)."""
+        return (await self._request("GET", "/playlists")).get("data", [])
+
+    async def set_playlist(self, screen_id: str, playlist_id: str) -> dict[str, Any]:
+        """Change la liste diffusée par un écran ; publiée aussitôt, sans approbation."""
+        return await self._request("PUT", f"/screens/{screen_id}/playlist", json={"playlistId": playlist_id})
+
+    async def capture(self, screen_id: str) -> dict[str, Any]:
+        """Demande un aperçu du direct (Pro, Android et Raspberry Pi)."""
+        return await self._request("POST", f"/screens/{screen_id}/capture")
+
+    async def capture_image(self, screen_id: str) -> bytes | None:
+        """Dernier aperçu du direct (JPEG), ou None s'il n'y en a pas encore."""
+        url = f"{self.base_url}{API_PATH}/screens/{screen_id}/capture"
+        try:
+            async with self.session.get(url, headers=self.auth_headers, timeout=aiohttp.ClientTimeout(total=15)) as res:
+                if res.status == 200:
+                    return await res.read()
+                if res.status == 401:
+                    raise LinkivAuthError("Accès refusé (401).")
+                return None
+        except aiohttp.ClientError as err:
+            raise LinkivError(f"Linkivi est injoignable : {err}") from err
+        except TimeoutError as err:
+            raise LinkivError("Linkivi ne répond pas.") from err
+
+    async def emergencies(self) -> list[dict[str, Any]]:
+        """Urgences en cours (accès emergency:read)."""
+        return (await self._request("GET", "/emergency")).get("data", [])
+
+    async def start_emergency(self, title: str, message: str | None, screens: list[str] | None, source: str) -> dict[str, Any]:
+        """Déclenche une urgence : sur ces écrans, ou sur tous (screens vide)."""
+        targets: dict[str, Any] = {"screens": screens} if screens else {"all": True}
+        body: dict[str, Any] = {"title": title, "targets": targets, "source": source}
+        if message:
+            body["message"] = message
+        return await self._request("POST", "/emergency", json=body)
+
+    async def end_emergency(self, emergency_id: str) -> dict[str, Any]:
+        """Lève une urgence."""
+        return await self._request("DELETE", f"/emergency/{emergency_id}")

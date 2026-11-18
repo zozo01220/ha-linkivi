@@ -40,6 +40,18 @@ Un bouton n'existe que si le matériel sait faire la commande :
 
 Un écran de **mur** se commande en entier : un ordre sur un écran du mur part sur tous.
 
+Depuis la 1.5 :
+
+| Entité | Type | Rôle |
+|---|---|---|
+| **Liste diffusée** | liste de choix | La liste de lecture de l'écran. En choisir une autre la publie aussitôt, sans approbation. Tous les plans. Pas pour un écran de mur, une borne ou un écran Home Assistant. |
+| **État** | capteur | En ligne, hors ligne, mise à jour, en veille ou en pause. |
+| **Dernière connexion** | capteur (désactivé par défaut) | Dernier contact de l'écran. |
+| **Aperçu du direct** | caméra | Ce que l'écran affiche (Pro, players Android et Raspberry Pi). Une nouvelle image est demandée au plus toutes les 60 s quand on la regarde. Un écran portrait peut arriver couché. |
+| **Urgence en cours** | capteur binaire, appareil « Organisation » | Une alerte d'urgence est en cours (si l'intégration « Alerte d'urgence » est installée dans Linkivi). |
+
+Actions : `linkivi.show_list` (`playlist` : nom de la liste), `linkivi.start_emergency` (`title` 40 caractères, `message` 300 ; sans cible, sur tous les écrans) et `linkivi.end_emergency` (lève toutes les alertes en cours). Une entrée reliée avant la 1.5 n'a pas les accès « liste » et « urgence » : supprimez l'intégration puis rajoutez-la avec un code.
+
 ## Temps réel et déclencheurs
 
 L'intégration garde une connexion ouverte vers Linkivi : un écran mis en veille, changé de liste ou tombé apparaît dans Home Assistant **dans les secondes qui suivent**, sans relevé. La connexion part de Home Assistant (port 443 sortant) : rien à ouvrir chez vous. Si un proxy bloque les WebSockets, elle passe toute seule en HTTPS simple (attente longue). Après une coupure, elle reprend là où elle s'était arrêtée.

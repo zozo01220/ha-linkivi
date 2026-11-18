@@ -18,7 +18,10 @@ from .const import (
     DOMAIN,
     LOOKS,
     SERVICE_CLEAR_DISPLAY,
+    SERVICE_END_EMERGENCY,
+    SERVICE_SHOW_LIST,
     SERVICE_SHOW_MESSAGE,
+    SERVICE_START_EMERGENCY,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,6 +44,13 @@ SHOW_MESSAGE_SCHEMA = vol.All(
 )
 
 CLEAR_DISPLAY_SCHEMA = vol.Schema({}, extra=vol.ALLOW_EXTRA)
+
+SHOW_LIST_SCHEMA = vol.Schema({vol.Required("playlist"): cv.string}, extra=vol.ALLOW_EXTRA)
+
+START_EMERGENCY_SCHEMA = vol.Schema(
+    {vol.Required("title"): vol.All(cv.string, vol.Length(max=40)), vol.Optional("message"): vol.All(cv.string, vol.Length(max=300))},
+    extra=vol.ALLOW_EXTRA,
+)
 
 
 def _ids(call: ServiceCall, key: str) -> set[str]:
@@ -91,11 +101,15 @@ async def _screens_of(hass: HomeAssistant, call: ServiceCall) -> list[tuple[obje
     return found
 
 
-async def _run(call: ServiceCall, send) -> None:
+def _has_target(call: ServiceCall) -> bool:
+    return any(_ids(call, k) for k in ("entity_id", "device_id", "area_id", "floor_id", "label_id"))
+
+
+async def _run(call: ServiceCall, send, pro_only: bool = True) -> None:
     """Envoie à chaque écran ; une erreur d'un écran n'empêche pas les autres, et toutes sont rapportées ensemble."""
     failures: list[str] = []
     targets = await _screens_of(call.hass, call)
-    if not any(getattr(c, "pro", True) for c, _ in targets):
+    if pro_only and not any(getattr(c, "pro", True) for c, _ in targets):
         raise ServiceValidationError("Afficher un message sur les écrans demande le plan Pro de Linkivi.")
     for coordinator, screen_id in targets:
         name = coordinator.data.get(screen_id, {}).get("name", screen_id)
@@ -132,5 +146,57 @@ async def async_register_services(hass: HomeAssistant) -> None:
 
         await _run(call, send)
 
+    async def show_list(call: ServiceCall) -> None:
+        name = call.data["playlist"].strip()
+
+        async def send(api, screen_id: str) -> None:
+            coordinator = next(e.runtime_data for e in hass.config_entries.async_entries(DOMAIN) if getattr(e, "runtime_data", None) and e.runtime_data.api is api)
+            pid = name if name in coordinator.playlists else next((i for i, n in coordinator.playlists.items() if n.casefold() == name.casefold()), None)
+            if pid is None:
+                raise LinkivError(f"liste « {name} » introuvable")
+            await api.set_playlist(screen_id, pid)
+
+        await _run(call, send, pro_only=False)
+
+    async def start_emergency(call: ServiceCall) -> None:
+        """Déclenche une urgence sur les écrans visés (ou sur tous, sans cible)."""
+        data = call.data
+        targeted = _has_target(call)
+        groups: dict[object, list[str]] = {}
+        if targeted:
+            for coordinator, sid in await _screens_of(hass, call):
+                groups.setdefault(coordinator, []).append(sid)
+        else:
+            groups = {e.runtime_data: [] for e in hass.config_entries.async_entries(DOMAIN) if getattr(e, "runtime_data", None)}
+        failures = []
+        for coordinator, ids in groups.items():
+            if "emergency:write" not in coordinator.scopes:
+                failures.append(f"{coordinator.org_name} : l'alerte d'urgence n'est pas disponible (intégration « Alerte d'urgence » de Linkivi, plan Pro ; puis nouvelle autorisation par code).")
+                continue
+            try:
+                await coordinator.api.start_emergency(data["title"], data.get("message"), ids, "Home Assistant")
+            except LinkivError as err:
+                failures.append(f"{coordinator.org_name} : {err}")
+        if failures:
+            raise HomeAssistantError("\n".join(failures))
+
+    async def end_emergency(call: ServiceCall) -> None:
+        """Lève toutes les urgences en cours (de toutes les organisations reliées)."""
+        failures = []
+        for e in hass.config_entries.async_entries(DOMAIN):
+            coordinator = getattr(e, "runtime_data", None)
+            if coordinator is None or "emergency:write" not in coordinator.scopes:
+                continue
+            try:
+                for em in await coordinator.api.emergencies():
+                    await coordinator.api.end_emergency(em["id"])
+            except LinkivError as err:
+                failures.append(f"{coordinator.org_name} : {err}")
+        if failures:
+            raise HomeAssistantError("\n".join(failures))
+
+    hass.services.async_register(DOMAIN, SERVICE_SHOW_LIST, show_list, schema=SHOW_LIST_SCHEMA)
+    hass.services.async_register(DOMAIN, SERVICE_START_EMERGENCY, start_emergency, schema=START_EMERGENCY_SCHEMA)
+    hass.services.async_register(DOMAIN, SERVICE_END_EMERGENCY, end_emergency, schema=vol.Schema({}))
     hass.services.async_register(DOMAIN, SERVICE_SHOW_MESSAGE, show_message, schema=SHOW_MESSAGE_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_CLEAR_DISPLAY, clear_display, schema=CLEAR_DISPLAY_SCHEMA)

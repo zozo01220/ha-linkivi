@@ -48,4 +48,7 @@ DEVICE_LABELS = {
 # Actions (services.py) : afficher un message sur des écrans, le retirer. Aspects acceptés par POST /screens/{id}/display.
 SERVICE_SHOW_MESSAGE = "show_message"
 SERVICE_CLEAR_DISPLAY = "clear_display"
+SERVICE_SHOW_LIST = "show_list"
+SERVICE_START_EMERGENCY = "start_emergency"
+SERVICE_END_EMERGENCY = "end_emergency"
 LOOKS = ["information", "attention"]

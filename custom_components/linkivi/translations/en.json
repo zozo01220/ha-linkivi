@@ -68,6 +68,9 @@
     "binary_sensor": {
       "online": {
         "name": "Online"
+      },
+      "emergency": {
+        "name": "Urgence en cours"
       }
     },
     "switch": {
@@ -84,6 +87,31 @@
       },
       "power_off": {
         "name": "Power off device"
+      }
+    },
+    "select": {
+      "playlist": {
+        "name": "Liste diffusée"
+      }
+    },
+    "sensor": {
+      "state": {
+        "name": "État",
+        "state": {
+          "online": "En ligne",
+          "offline": "Hors ligne",
+          "updating": "Mise à jour",
+          "asleep": "En veille",
+          "paused": "En pause"
+        }
+      },
+      "last_seen": {
+        "name": "Dernière connexion"
+      }
+    },
+    "camera": {
+      "preview": {
+        "name": "Aperçu du direct"
       }
     }
   },
@@ -121,6 +149,34 @@
     "clear_display": {
       "name": "Stop the display",
       "description": "Removes the message: the playlist resumes at once."
+    },
+    "show_list": {
+      "name": "Changer la liste diffusée",
+      "description": "Fait diffuser une autre liste de lecture aux écrans choisis : publiée aussitôt, sans approbation. Tous les plans.",
+      "fields": {
+        "playlist": {
+          "name": "Liste",
+          "description": "Nom de la liste de lecture dans Linkivi (ou son identifiant)."
+        }
+      }
+    },
+    "start_emergency": {
+      "name": "Déclencher une alerte d'urgence",
+      "description": "Plein écran rouge sur les écrans choisis (sur tous, sans cible), jusqu'à « Lever l'alerte ». Plan Pro et intégration « Alerte d'urgence » de Linkivi.",
+      "fields": {
+        "title": {
+          "name": "Titre",
+          "description": "Jusqu'à 40 caractères."
+        },
+        "message": {
+          "name": "Message",
+          "description": "Jusqu'à 300 caractères."
+        }
+      }
+    },
+    "end_emergency": {
+      "name": "Lever l'alerte d'urgence",
+      "description": "Lève toutes les alertes d'urgence en cours : la diffusion reprend."
     }
   },
   "selector": {

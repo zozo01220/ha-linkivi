@@ -23,7 +23,7 @@ from .stream import LinkivStream
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.SWITCH]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.CAMERA, Platform.SELECT, Platform.SENSOR, Platform.SWITCH]
 
 
 class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
@@ -35,10 +35,20 @@ class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         # Plan Pro : commandes et messages permis (sur les autres plans, ni boutons ni interrupteur ni actions)
         self.pro: bool | None = None
         self.stream: LinkivStream | None = None
+        # Accès de la clé (/me) : l'urgence n'est là que si « Alerte d'urgence » est installée dans Linkivi
+        self.scopes: set[str] = set()
+        self.org_id: str = ""
+        self.org_name: str = "Linkivi"
+        # Listes de lecture (id → nom), relues avec les écrans ; urgences en cours (id → titre), tenues par le canal
+        self.playlists: dict[str, str] = {}
+        self.emergencies: dict[str, str] = {}
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         try:
             screens = await self.api.screens()
+            self.playlists = {p["id"]: p.get("name", "") for p in await self.api.playlists()}
+            if "emergency:read" in self.scopes:
+                self.emergencies = {e["id"]: e.get("title", "") for e in await self.api.emergencies()}
         except LinkivAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
         except LinkivError as err:
@@ -65,7 +75,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryAuthFailed(str(err)) from err
     except LinkivError as err:
         raise ConfigEntryNotReady(str(err)) from err
-    coordinator.pro = bool((me.get("organisation") or {}).get("pro", True))
+    org = me.get("organisation") or {}
+    coordinator.pro = bool(org.get("pro", True))
+    coordinator.org_id = str(org.get("id") or entry.entry_id)
+    coordinator.org_name = org.get("name") or "Linkivi"
+    coordinator.scopes = set((me.get("key") or {}).get("scopes") or [])
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
