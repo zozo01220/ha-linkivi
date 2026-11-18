@@ -2,66 +2,66 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connecter Linkivi",
-        "description": "Comment voulez-vous relier Home Assistant à Linkivi ?",
+        "title": "Connect Linkivi",
+        "description": "How do you want to connect Home Assistant to Linkivi?",
         "menu_options": {
-          "code": "Se connecter avec un code (conseillé)",
-          "key": "Coller une clé d'API (avancé)"
+          "code": "Sign in with a code (recommended)",
+          "key": "Paste an API key (advanced)"
         }
       },
       "code": {
-        "title": "Se connecter avec un code",
-        "description": "Adresse de votre Linkivi. Home Assistant va afficher un code à vérifier dans Linkivi.",
+        "title": "Sign in with a code",
+        "description": "Address of your Linkivi. Home Assistant will show a code to check in Linkivi.",
         "data": {
-          "url": "Adresse de Linkivi"
+          "url": "Linkivi address"
         }
       },
       "key": {
-        "title": "Coller une clé d'API",
-        "description": "Créez une clé avec le modèle « Home Assistant » dans Linkivi (API et webhooks, plan Pro).",
+        "title": "Paste an API key",
+        "description": "Create a key with the \"Home Assistant\" template in Linkivi (API and webhooks, Pro plan).",
         "data": {
-          "url": "Adresse de Linkivi",
-          "api_key": "Clé d'API (lkv_…)"
+          "url": "Linkivi address",
+          "api_key": "API key (lkv_…)"
         }
       },
       "reauth_confirm": {
-        "title": "Nouvelle autorisation",
-        "description": "L'accès de Home Assistant a été retiré dans Linkivi, ou la clé a expiré.",
+        "title": "New authorization",
+        "description": "Home Assistant's access was removed in Linkivi, or the key expired.",
         "menu_options": {
-          "code": "Se connecter avec un code (conseillé)",
-          "reauth_key": "Coller une clé d'API (avancé)"
+          "code": "Sign in with a code (recommended)",
+          "reauth_key": "Paste an API key (advanced)"
         }
       },
       "reauth_key": {
-        "title": "Nouvelle clé d'API",
-        "description": "Collez une nouvelle clé (modèle « Home Assistant »).",
+        "title": "New API key",
+        "description": "Paste a new key (\"Home Assistant\" template).",
         "data": {
-          "api_key": "Clé d'API (lkv_…)"
+          "api_key": "API key (lkv_…)"
         }
       }
     },
     "progress": {
-      "wait": "Ouvrez ce lien et vérifiez le code :\n\n[{url}]({url})\n\n## {code}\n\nCliquez sur « Autoriser » dans Linkivi. En attente de l'autorisation… Le code est valable 10 minutes."
+      "wait": "Open this link and check the code:\n\n[{url}]({url})\n\n## {code}\n\nClick \"Allow\" in Linkivi. Waiting for the authorization… The code is valid for 10 minutes."
     },
     "error": {
-      "cannot_connect": "Linkivi est injoignable à cette adresse.",
-      "invalid_auth": "Clé refusée : vérifiez qu'elle est active et du modèle « Home Assistant ».",
-      "unknown": "Erreur inattendue."
+      "cannot_connect": "Linkivi cannot be reached at this address.",
+      "invalid_auth": "Key refused: check that it is active and uses the \"Home Assistant\" template.",
+      "unknown": "Unexpected error."
     },
     "abort": {
-      "already_configured": "Cette organisation est déjà connectée.",
-      "reauth_successful": "Accès renouvelé.",
-      "expired": "Le code a expiré : recommencez l'ajout.",
-      "denied": "L'accès a été refusé dans Linkivi.",
-      "cannot_connect": "Linkivi est injoignable à cette adresse."
+      "already_configured": "This organisation is already connected.",
+      "reauth_successful": "Access renewed.",
+      "expired": "The code expired: start adding the integration again.",
+      "denied": "Access was refused in Linkivi.",
+      "cannot_connect": "Linkivi cannot be reached at this address."
     }
   },
   "device_automation": {
     "trigger_type": {
-      "offline": "{entity_name} ne répond plus",
-      "online": "{entity_name} est de retour",
-      "applied": "{entity_name} affiche une nouvelle version",
-      "emergency": "{entity_name} affiche l'alerte d'urgence"
+      "offline": "{entity_name} stopped responding",
+      "online": "{entity_name} is back online",
+      "applied": "{entity_name} shows a new version",
+      "emergency": "{entity_name} shows the emergency alert"
     }
   },
   "entity": {
@@ -70,7 +70,7 @@
         "name": "Online"
       },
       "emergency": {
-        "name": "Urgence en cours"
+        "name": "Emergency in progress"
       }
     },
     "switch": {
@@ -91,27 +91,27 @@
     },
     "select": {
       "playlist": {
-        "name": "Liste diffusée"
+        "name": "Playlist"
       }
     },
     "sensor": {
       "state": {
-        "name": "État",
+        "name": "Status",
         "state": {
-          "online": "En ligne",
-          "offline": "Hors ligne",
-          "updating": "Mise à jour",
-          "asleep": "En veille",
-          "paused": "En pause"
+          "online": "Online",
+          "offline": "Offline",
+          "updating": "Updating",
+          "asleep": "Asleep",
+          "paused": "Paused"
         }
       },
       "last_seen": {
-        "name": "Dernière connexion"
+        "name": "Last seen"
       }
     },
     "camera": {
       "preview": {
-        "name": "Aperçu du direct"
+        "name": "Live preview"
       }
     }
   },
@@ -151,32 +151,32 @@
       "description": "Removes the message: the playlist resumes at once."
     },
     "show_list": {
-      "name": "Changer la liste diffusée",
-      "description": "Fait diffuser une autre liste de lecture aux écrans choisis : publiée aussitôt, sans approbation. Tous les plans.",
+      "name": "Change the playlist",
+      "description": "Makes the chosen screens play another playlist: published at once, without approval. All plans.",
       "fields": {
         "playlist": {
-          "name": "Liste",
-          "description": "Nom de la liste de lecture dans Linkivi (ou son identifiant)."
+          "name": "Playlist",
+          "description": "Name of the playlist in Linkivi (or its identifier)."
         }
       }
     },
     "start_emergency": {
-      "name": "Déclencher une alerte d'urgence",
-      "description": "Plein écran rouge sur les écrans choisis (sur tous, sans cible), jusqu'à « Lever l'alerte ». Plan Pro et intégration « Alerte d'urgence » de Linkivi.",
+      "name": "Start an emergency alert",
+      "description": "Red full screen on the chosen screens (on all of them without a target), until \"End the emergency alert\". Pro plan and the Linkivi \"Emergency alert\" integration.",
       "fields": {
         "title": {
-          "name": "Titre",
-          "description": "Jusqu'à 40 caractères."
+          "name": "Title",
+          "description": "Up to 40 characters."
         },
         "message": {
           "name": "Message",
-          "description": "Jusqu'à 300 caractères."
+          "description": "Up to 300 characters."
         }
       }
     },
     "end_emergency": {
-      "name": "Lever l'alerte d'urgence",
-      "description": "Lève toutes les alertes d'urgence en cours : la diffusion reprend."
+      "name": "End the emergency alert",
+      "description": "Ends every emergency alert in progress: the playlist resumes."
     }
   },
   "selector": {
@@ -196,13 +196,13 @@
   "options": {
     "step": {
       "init": {
-        "title": "Partager avec Linkivi",
-        "description": "Ce que les écrans de Linkivi montrent de cette maison. Rien n'est partagé tant que vous ne choisissez rien. Les serrures et alarmes ne sont jamais partagées par une pièce ou un libellé : choisissez-les une à une.",
+        "title": "Share with Linkivi",
+        "description": "What the Linkivi screens show of this home. Nothing is shared until you choose. Locks and alarms are never shared through a room or a label: choose them one by one.",
         "data": {
-          "share_areas": "Pièces",
-          "share_labels": "Libellés",
-          "share_entities": "Entités",
-          "share_commands": "Permettre aux écrans de commander ces appareils"
+          "share_areas": "Rooms",
+          "share_labels": "Labels",
+          "share_entities": "Entities",
+          "share_commands": "Allow screens to control these devices"
         }
       }
     }
