@@ -89,10 +89,10 @@ Modifier le tableau de bord › Ajouter une carte › **Écrans Linkivi**. Elle 
 **Depuis la carte 2.0 (intégration 1.7)** :
 
 - **Liste diffusée** sous chaque écran : un clic la change, publiée aussitôt ; une bulle « Annuler » remet l'ancienne pendant 10 s. Sans le Pro, la liste passe à droite, en pastille.
-- **Aperçu du direct** dans la télé (style ) ou en vignette (style ), pour un écran allumé et en ligne : une nouvelle image toutes les  minutes (5 par défaut), seulement quand la carte est visible, car chaque image demande une capture à l'appareil.
+- **Aperçu du direct** dans la télé (style `cards`) ou en vignette (style `list`), pour un écran allumé et en ligne : une nouvelle image toutes les `preview_interval` minutes (5 par défaut), seulement quand la carte est visible, car chaque image demande une capture à l'appareil.
 - **Fenêtre d'un écran** (clic sur la télé ou la ligne) : grand aperçu, actualisé à l'ouverture puis chaque minute, liste diffusée, état, dernière connexion et commandes.
-- **Alerte d'urgence** : bandeau rouge en tête de carte tant qu'une alerte est en cours, avec « Lever l'alerte » ; « Déclencher une alerte… » dans le menu ⋮ de la carte (appui maintenu 1,5 s), sur les écrans de la carte (filtre ) ou sur tous. Réservé aux administrateurs de Home Assistant, sauf .
-- Options : , , , , .
+- **Alerte d'urgence** : bandeau rouge en tête de carte tant qu'une alerte est en cours, avec « Lever l'alerte » ; « Déclencher une alerte… » dans le menu ⋮ de la carte (appui maintenu 1,5 s), sur les écrans de la carte (filtre `screens`) ou sur tous. Réservé aux administrateurs de Home Assistant, sauf `emergency_for_all: true`.
+- Options : `show_playlist`, `show_preview`, `preview_interval`, `show_emergency`, `emergency_for_all`.
 
 Une commande montre « en cours » aussitôt (l'état confirmé arrive par le canal temps réel, en quelques secondes) ; si Linkivi refuse, sa raison s'affiche en notification. Les animations s'arrêtent si le système demande moins de mouvement.
 
