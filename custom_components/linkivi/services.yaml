@@ -2,8 +2,6 @@ show_message:
   target:
     entity:
       integration: linkivi
-    device:
-      integration: linkivi
   fields:
     title:
       example: "Un visiteur est à l'accueil"
@@ -47,14 +45,10 @@ clear_display:
   target:
     entity:
       integration: linkivi
-    device:
-      integration: linkivi
 
 show_list:
   target:
     entity:
-      integration: linkivi
-    device:
       integration: linkivi
   fields:
     playlist:
@@ -66,8 +60,6 @@ show_list:
 start_emergency:
   target:
     entity:
-      integration: linkivi
-    device:
       integration: linkivi
   fields:
     title:
