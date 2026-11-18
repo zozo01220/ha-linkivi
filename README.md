@@ -3,16 +3,22 @@
 Voir et commander ses écrans Linkivi depuis Home Assistant : redémarrer le player, redémarrer l'appareil, éteindre l'appareil, éteindre l'écran, le réveiller, et **y afficher un message** (sonnette, lave-linge terminé…).
 Chaque écran devient un **appareil** Home Assistant. À ne pas confondre avec l'intégration Home Assistant **de** Linkivi (lire et commander les appareils d'une maison sur les écrans) : ici, c'est l'inverse.
 
-Prérequis : Home Assistant 2024.11 ou plus récent, organisation Linkivi au **plan Pro** (l'API et les commandes d'appareil en font partie).
+Prérequis : Home Assistant 2024.11 ou plus récent. **Tous les plans** de Linkivi : voir les écrans, leur état et leurs événements. **Plan Pro** : commander les écrans et y afficher un message (sur les autres plans, l'intégration ne crée ni les boutons, ni l'interrupteur « Écran », ni les actions).
 
 ## Installer
 
-1. **Dans Linkivi** : Réglages › Développeurs › Nouvelle clé, modèle **Home Assistant** (accès « Compte » et « Écrans », dont « Commander les écrans »). Copiez la clé `lkv_…`, elle ne s'affiche qu'une fois.
-   - Une clé créée par un administrateur commande tous les écrans. Une clé créée par un membre suit les droits de sa fiche : « Éteindre l'écran », « Redémarrer l'appareil » et « Éteindre l'appareil », sur les écrans qui lui sont attribués.
-2. **Dans Home Assistant** : copiez le dossier `custom_components/linkivi` dans le dossier `config/custom_components/` de Home Assistant, puis redémarrez Home Assistant.
-3. Paramètres › Appareils et services › Ajouter une intégration › **Linkivi** : adresse du serveur (par exemple `https://linkivi.com`) et clé d'API.
+1. **Dans Home Assistant** : copiez le dossier `custom_components/linkivi` dans le dossier `config/custom_components/` de Home Assistant, puis redémarrez Home Assistant.
+2. Paramètres › Appareils et services › Ajouter une intégration › **Linkivi** › **Se connecter avec un code** : adresse de votre Linkivi (par exemple `https://linkivi.duckdns.org`).
+3. Home Assistant affiche un **lien** et un **code** (8 lettres, `WDJB-MJHT`), valable 10 minutes. Ouvrez le lien : Linkivi s'ouvre (connectez-vous si besoin), vérifiez que le code est le même, choisissez l'organisation si vous en gérez plusieurs, puis **Autoriser**.
+4. Home Assistant reçoit sa clé tout seul : les écrans apparaissent en quelques secondes.
 
-Les écrans ajoutés plus tard dans Linkivi apparaissent seuls (relevé toutes les 30 secondes).
+Qui peut autoriser : un administrateur de l'organisation, ou un membre qui publie **sans approbation**. Home Assistant agit ensuite au nom de cette personne, sans approbation. L'accès se retire dans Linkivi, Applications › Home Assistant › « Accès de Home Assistant » ; supprimer l'intégration dans Home Assistant le retire aussi.
+
+**Avancé** : « Coller une clé d'API » marche toujours avec une clé du modèle « Home Assistant » créée dans « API et webhooks » (plan Pro).
+
+**Mise à jour depuis la 1.3** : l'entrée existante garde sa clé collée à la main et passe au temps réel ; rien à refaire.
+
+Les écrans ajoutés plus tard dans Linkivi apparaissent seuls, **en direct** (voir « Temps réel »).
 
 ## Ce que chaque écran offre
 
@@ -34,6 +40,21 @@ Un bouton n'existe que si le matériel sait faire la commande :
 
 Un écran de **mur** se commande en entier : un ordre sur un écran du mur part sur tous.
 
+## Temps réel et déclencheurs
+
+L'intégration garde une connexion ouverte vers Linkivi : un écran mis en veille, changé de liste ou tombé apparaît dans Home Assistant **dans les secondes qui suivent**, sans relevé. La connexion part de Home Assistant (port 443 sortant) : rien à ouvrir chez vous. Si un proxy bloque les WebSockets, elle passe toute seule en HTTPS simple (attente longue). Après une coupure, elle reprend là où elle s'était arrêtée.
+
+Chaque écran propose quatre **déclencheurs** dans l'éditeur d'automatisations (Déclencheur › Appareil › l'écran) :
+
+| Déclencheur | Quand |
+|---|---|
+| ne répond plus | L'écran est hors ligne depuis le délai d'alerte des Réglages de Linkivi (hors veille). |
+| est de retour | L'écran signalé hors ligne répond de nouveau. |
+| affiche une nouvelle version | Une publication est arrivée sur l'écran. |
+| affiche l'alerte d'urgence | L'écran confirme afficher une alerte d'urgence. |
+
+Tous les événements de Linkivi passent aussi sur le bus de Home Assistant sous le nom `linkivi_event` (`type`, `event`, `screen_id`, `device_id`, `data`).
+
 ## La carte « Écrans Linkivi »
 
 Une carte pour le tableau de bord, fournie par l'intégration. Après l'installation (ou une mise à jour), **redémarrez Home Assistant**, puis rechargez la page avec Ctrl+F5.
@@ -47,7 +68,7 @@ Modifier le tableau de bord › Ajouter une carte › **Écrans Linkivi**. Elle 
 | `list` (par défaut) | « Verre » : une ligne givrée par écran sur un fond dégradé. Un médaillon dont la couleur dit l'état (vert allumé, bleu en veille, orange en cours, gris hors ligne), le redémarrage du player, le menu ⋮ (redémarrer ou éteindre l'appareil, avec confirmation) et un interrupteur lumineux « Écran ». |
 | `cards` | « Écrans » : chaque écran est une petite télé dont l'état se lit sur l'écran (bleu et reflet avec un voyant qui bat, noir en veille, hachuré hors ligne, roue pendant une commande). Dessous : le nom, le bouton d'allumage rond, le redémarrage du player et le menu ⋮. Se met en colonnes selon la largeur. |
 
-Une commande montre « en cours » aussitôt (l'état confirmé arrive au relevé suivant, 30 s au plus) ; si Linkivi refuse, sa raison s'affiche en notification. Les animations s'arrêtent si le système demande moins de mouvement.
+Une commande montre « en cours » aussitôt (l'état confirmé arrive par le canal temps réel, en quelques secondes) ; si Linkivi refuse, sa raison s'affiche en notification. Les animations s'arrêtent si le système demande moins de mouvement.
 
 ```yaml
 type: custom:linkivi-screens-card   # tout le reste est facultatif
@@ -129,8 +150,12 @@ L'intégration n'appelle que l'API publique de Linkivi (voir `/docs/api` sur vot
 
 | Appel | Accès | Usage |
 |---|---|---|
-| `GET /api/v1/me` | `account:read` | Nom de l'organisation, au moment de l'ajout. |
-| `GET /api/v1/screens` | `screens:read` | État des écrans, toutes les 30 s. Chaque écran liste dans `commands` ce que son matériel sait faire. |
+| `POST /api/v1/ha/pair`, `POST /api/v1/ha/pair/token` | sans clé | Appairage par code : demande du code, puis relevé de la réponse toutes les 5 s (`202` en attente, `200` avec la clé, `403` refusé, `410` expiré). |
+| `GET /api/v1/me` | `account:read` | Nom de l'organisation et `pro` (commandes et messages permis). |
+| `DELETE /api/v1/me` | `account:read` | Révoque la clé, quand on supprime l'intégration. |
+| `GET /api/v1/stream` (WebSocket) | `screens:read` | Canal temps réel : un état complet (`snapshot`), puis `screen.changed`, `screen.removed` et les événements ; `?after=<seq>` pour reprendre. |
+| `GET /api/v1/stream/next` | `screens:read` | Le même canal en attente longue, si le WebSocket ne passe pas. |
+| `GET /api/v1/screens` | `screens:read` | Relecture complète toutes les 5 min, par sécurité. Chaque écran liste dans `commands` ce que son matériel sait faire. |
 | `POST /api/v1/screens/{id}/commands` | `screens:control` | `{"command": "restart-player" \| "reboot" \| "poweroff" \| "screen-off" \| "wake"}`, réponse `202`. |
 | `POST /api/v1/screens/{id}/display` | `screens:control` | `{"title", "message", "look", "durationSeconds", "wake"}`, réponse `202`. |
 | `DELETE /api/v1/screens/{id}/display` | `screens:control` | Retire le message. |
@@ -138,5 +163,7 @@ L'intégration n'appelle que l'API publique de Linkivi (voir `/docs/api` sur vot
 Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Authorization: Bearer lkv_…"`).
 
 ## Pas encore essayé
+
+**Version 1.4 (connexion par code, temps réel, déclencheurs)** : jamais lancée dans un vrai Home Assistant. Le code Python n'a pas été exécuté (pas de Python sur le poste de développement). Le serveur est couvert par des tests (`HaPairingTests`, dont le WebSocket et l'attente longue), pas encore à travers le vrai proxy du serveur.
 
 Les entités de l'intégration ont été vues sur une vraie instance (six écrans). En revanche, le code Python n'a jamais été exécuté sur le poste de développement (pas de Python) et **les boutons, l'interrupteur et l'action « Afficher un message » n'ont pas encore été essayés en vrai** (le serveur et l'affichage du message dans le player le sont par des tests et un essai dans le navigateur, pas sur un vrai écran) ; la carte, elle, a été essayée dans un faux Home Assistant (liste, cartes, menu, confirmations, erreurs, filtres) mais **pas dans le vrai** : l'enregistrement par l'intégration, l'éditeur visuel et le rendu sur votre thème sont à vérifier. L'API de Linkivi est couverte par des tests (`ScreenCommandsApiTests`).

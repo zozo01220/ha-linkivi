@@ -9,11 +9,28 @@ CARD_FILE = "linkivi-screens-card.js"
 CARD_URL = f"/{DOMAIN}/{CARD_FILE}"
 CARD_VERSION = "1.2.0"
 
-# L'API publique de Linkivi (§154) : lecture des écrans toutes les 30 s (limite de 60 requêtes par minute et par clé).
-SCAN_INTERVAL = timedelta(seconds=30)
+# L'API publique de Linkivi (§154). L'état arrive en direct par le canal temps réel (§299) ;
+# la relecture complète n'est plus qu'un filet de sécurité (toutes les 5 min).
+SCAN_INTERVAL = timedelta(minutes=5)
 API_PATH = "/api/v1"
+DEFAULT_URL = "https://linkivi.duckdns.org"
 
-# Commandes acceptées par POST /screens/{id}/commands (module « Écrans », accès screens:control).
+# Canal temps réel : WebSocket d'abord ; après 3 échecs de suite, attente longue en HTTPS pendant 5 min, puis nouvel essai du WebSocket.
+WS_FAILURES_BEFORE_LONG_POLL = 3
+LONG_POLL_PERIOD = 300
+RETRY_MIN, RETRY_MAX = 5, 60
+
+# Événement Home Assistant émis pour chaque événement de Linkivi (déclencheurs d'appareil : device_trigger.py).
+EVENT = "linkivi_event"
+# Événement de Linkivi → type de déclencheur d'un écran
+TRIGGERS = {
+    "screen.offline": "offline",
+    "screen.online": "online",
+    "screen.applied": "applied",
+    "emergency.acknowledged": "emergency",
+}
+
+# Commandes acceptées par POST /screens/{id}/commands (module « Écrans », accès screens:control, plan Pro).
 CMD_RESTART_PLAYER = "restart-player"
 CMD_REBOOT = "reboot"
 CMD_POWER_OFF = "poweroff"

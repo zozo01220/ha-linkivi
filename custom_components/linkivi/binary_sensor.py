@@ -39,6 +39,7 @@ class LinkivOnlineSensor(LinkivEntity, BinarySensorEntity):
             "status": s.get("status"),
             "last_seen": s.get("lastSeenAt"),
             "paused": s.get("paused"),
+            "asleep": s.get("asleep"),
             "area": (s.get("area") or {}).get("name"),
             "zone": (s.get("zone") or {}).get("name"),
             "playlist": (s.get("playlist") or {}).get("name"),

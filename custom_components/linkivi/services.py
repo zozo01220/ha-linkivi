@@ -94,7 +94,10 @@ async def _screens_of(hass: HomeAssistant, call: ServiceCall) -> list[tuple[obje
 async def _run(call: ServiceCall, send) -> None:
     """Envoie à chaque écran ; une erreur d'un écran n'empêche pas les autres, et toutes sont rapportées ensemble."""
     failures: list[str] = []
-    for coordinator, screen_id in await _screens_of(call.hass, call):
+    targets = await _screens_of(call.hass, call)
+    if not any(getattr(c, "pro", True) for c, _ in targets):
+        raise ServiceValidationError("Afficher un message sur les écrans demande le plan Pro de Linkivi.")
+    for coordinator, screen_id in targets:
         name = coordinator.data.get(screen_id, {}).get("name", screen_id)
         try:
             await send(coordinator.api, screen_id)

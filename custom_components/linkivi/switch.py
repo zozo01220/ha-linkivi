@@ -17,6 +17,8 @@ from .entity import LinkivEntity, add_new_screens
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator = entry.runtime_data
+    if not coordinator.pro:
+        return   # commander un écran demande le plan Pro : sans lui, pas d'interrupteur (l'état « en veille » reste un attribut de « En ligne »)
     entry.async_on_unload(
         add_new_screens(coordinator, async_add_entities, lambda sid, _s: [LinkivScreenSwitch(coordinator, sid)])
     )

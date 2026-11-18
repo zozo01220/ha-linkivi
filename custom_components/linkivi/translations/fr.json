@@ -3,28 +3,65 @@
     "step": {
       "user": {
         "title": "Connecter Linkivi",
-        "description": "Créez une clé d'API avec le modèle « Home Assistant » dans Linkivi (Réglages › Développeurs). Le plan Pro est nécessaire.",
+        "description": "Comment voulez-vous relier Home Assistant à Linkivi ?",
+        "menu_options": {
+          "code": "Se connecter avec un code (conseillé)",
+          "key": "Coller une clé d'API (avancé)"
+        }
+      },
+      "code": {
+        "title": "Se connecter avec un code",
+        "description": "Adresse de votre Linkivi. Home Assistant va afficher un code à vérifier dans Linkivi.",
+        "data": {
+          "url": "Adresse de Linkivi"
+        }
+      },
+      "key": {
+        "title": "Coller une clé d'API",
+        "description": "Créez une clé avec le modèle « Home Assistant » dans Linkivi (API et webhooks, plan Pro).",
         "data": {
           "url": "Adresse de Linkivi",
           "api_key": "Clé d'API (lkv_…)"
         }
       },
       "reauth_confirm": {
+        "title": "Nouvelle autorisation",
+        "description": "L'accès de Home Assistant a été retiré dans Linkivi, ou la clé a expiré.",
+        "menu_options": {
+          "code": "Se connecter avec un code (conseillé)",
+          "reauth_key": "Coller une clé d'API (avancé)"
+        }
+      },
+      "reauth_key": {
         "title": "Nouvelle clé d'API",
-        "description": "La clé de Linkivi a été révoquée ou a expiré. Collez-en une nouvelle (modèle « Home Assistant »).",
+        "description": "Collez une nouvelle clé (modèle « Home Assistant »).",
         "data": {
           "api_key": "Clé d'API (lkv_…)"
         }
       }
     },
+    "progress": {
+      "wait": "Ouvrez ce lien et vérifiez le code :\n\n[{url}]({url})\n\n## {code}\n\nCliquez sur « Autoriser » dans Linkivi. En attente de l'autorisation… Le code est valable 10 minutes."
+    },
     "error": {
       "cannot_connect": "Linkivi est injoignable à cette adresse.",
-      "invalid_auth": "Clé refusée : vérifiez qu'elle est active, du modèle « Home Assistant » et que l'organisation est au plan Pro.",
+      "invalid_auth": "Clé refusée : vérifiez qu'elle est active et du modèle « Home Assistant ».",
       "unknown": "Erreur inattendue."
     },
     "abort": {
       "already_configured": "Cette organisation est déjà connectée.",
-      "reauth_successful": "Clé mise à jour."
+      "reauth_successful": "Accès renouvelé.",
+      "expired": "Le code a expiré : recommencez l'ajout.",
+      "denied": "L'accès a été refusé dans Linkivi.",
+      "cannot_connect": "Linkivi est injoignable à cette adresse."
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "offline": "{entity_name} ne répond plus",
+      "online": "{entity_name} est de retour",
+      "applied": "{entity_name} affiche une nouvelle version",
+      "emergency": "{entity_name} affiche l'alerte d'urgence"
     }
   },
   "entity": {
