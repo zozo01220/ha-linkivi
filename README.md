@@ -52,6 +52,12 @@ Depuis la 1.5 :
 
 Actions : `linkivi.show_list` (`playlist` : nom de la liste), `linkivi.start_emergency` (`title` 40 caractères, `message` 300 ; sans cible, sur tous les écrans) et `linkivi.end_emergency` (lève toutes les alertes en cours). Une entrée reliée avant la 1.5 n'a pas les accès « liste » et « urgence » : supprimez l'intégration puis rajoutez-la avec un code.
 
+## Montrer les appareils de la maison sur les écrans (1.6)
+
+Dans Linkivi, Applications › Home Assistant › « Par l'intégration Linkivi » (conseillé). Puis, dans Home Assistant : Paramètres › Appareils et services › Linkivi › **Configurer** › « Partager avec Linkivi » : des pièces, des libellés ou des entités, et « Permettre aux écrans de commander ces appareils » (non par défaut). Les serrures et les alarmes ne se partagent qu'une à une. Linkivi ne garde alors **aucun jeton** de votre Home Assistant et n'a plus besoin du relais : il demande les états, l'historique et les images des caméras à l'intégration, qui ne répond que pour ce qui est partagé.
+
+Déjà relié en direct ou par le relais ? Le bandeau « Passer par l'intégration » de Applications › Home Assistant fait la bascule dès que toutes les entités utilisées par vos écrans sont partagées ; l'ancien jeton est alors oublié.
+
 ## Temps réel et déclencheurs
 
 L'intégration garde une connexion ouverte vers Linkivi : un écran mis en veille, changé de liste ou tombé apparaît dans Home Assistant **dans les secondes qui suivent**, sans relevé. La connexion part de Home Assistant (port 443 sortant) : rien à ouvrir chez vous. Si un proxy bloque les WebSockets, elle passe toute seule en HTTPS simple (attente longue). Après une coupure, elle reprend là où elle s'était arrêtée.

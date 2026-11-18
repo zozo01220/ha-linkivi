@@ -192,5 +192,19 @@
         "banner": "Bandeau"
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Partager avec Linkivi",
+        "description": "Ce que les écrans de Linkivi montrent de cette maison. Rien n'est partagé tant que vous ne choisissez rien. Les serrures et alarmes ne sont jamais partagées par une pièce ou un libellé : choisissez-les une à une.",
+        "data": {
+          "share_areas": "Pièces",
+          "share_labels": "Libellés",
+          "share_entities": "Entités",
+          "share_commands": "Permettre aux écrans de commander ces appareils"
+        }
+      }
+    }
   }
 }

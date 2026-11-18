@@ -119,6 +119,10 @@ class LinkivApi:
         url = self.base_url.replace("https://", "wss://", 1).replace("http://", "ws://", 1) + f"{API_PATH}/stream"
         return url if after is None else f"{url}?after={after}"
 
+    async def stream_up(self, message: dict[str, Any]) -> None:
+        """Message de l'intégration vers Linkivi quand le WebSocket ne passe pas (réponses, signaux : §303)."""
+        await self._request("POST", "/stream/up", json=message, timeout=30)
+
     async def stream_next(self, after: int | None) -> dict[str, Any]:
         """Le même canal en attente longue (HTTPS simple) : rend après 25 s au plus."""
         params = {} if after is None else {"after": after}

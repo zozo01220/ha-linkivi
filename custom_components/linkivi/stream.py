@@ -38,6 +38,30 @@ class LinkivStream:
         self.after: int | None = None
         self.connected = False
         self.mode: str | None = None
+        self._ws: aiohttp.ClientWebSocketResponse | None = None
+
+    async def send(self, message: dict[str, Any]) -> None:
+        """Vers Linkivi (§303) : par le WebSocket ouvert, sinon en HTTPS (POST /stream/up). Une erreur d'envoi ne casse jamais le canal."""
+        try:
+            if self._ws is not None and not self._ws.closed:
+                await self._ws.send_str(json.dumps(message, ensure_ascii=False))
+            else:
+                await self.api.stream_up(message)
+        except (aiohttp.ClientError, LinkivError, ConnectionResetError, RuntimeError) as err:
+            _LOGGER.debug("Linkivi : envoi impossible (%s)", err)
+
+    async def _announce(self) -> None:
+        share = getattr(self.coordinator, "share", None)
+        if share is not None:
+            await self.send(share.share_message())
+
+    async def _answer(self, request: dict[str, Any]) -> None:
+        share = getattr(self.coordinator, "share", None)
+        if share is None:
+            return
+        reply = await share.answer(request)
+        if reply is not None:
+            await self.send(reply)
 
     async def run(self) -> None:
         """Boucle de vie du canal (tâche de fond de l'entrée : annulée au déchargement)."""
@@ -72,16 +96,20 @@ class LinkivStream:
         loop = asyncio.get_running_loop()
         opened = loop.time()
         try:
-            async with self.api.session.ws_connect(self.api.stream_url(self.after), headers=self.api.auth_headers, heartbeat=30) as ws:
+            async with self.api.session.ws_connect(self.api.stream_url(self.after), headers=self.api.auth_headers, heartbeat=30, max_msg_size=16 * 1024 * 1024) as ws:
                 self.connected = True
+                self._ws = ws
+                await self._announce()   # ce qui est partagé avec Linkivi (§303)
                 async for msg in ws:
                     if msg.type == aiohttp.WSMsgType.TEXT:
                         self._handle(json.loads(msg.data))
                     elif msg.type in (aiohttp.WSMsgType.CLOSE, aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
                         break
+                self._ws = None
                 if ws.close_code == CLOSE_ACCESS_REMOVED:
                     raise LinkivAuthError("Accès retiré dans Linkivi.")
         except aiohttp.WSServerHandshakeError as err:
+            self._ws = None
             if err.status in (401, 403):
                 raise LinkivAuthError(f"Accès refusé ({err.status}).") from err
             raise
@@ -94,6 +122,8 @@ class LinkivStream:
         self.mode = "long_poll"
         loop = asyncio.get_running_loop()
         end = loop.time() + period
+        self._ws = None
+        await self._announce()
         while loop.time() < end:
             body = await self.api.stream_next(self.after)
             self.connected = True
@@ -109,6 +139,12 @@ class LinkivStream:
         seq = m.get("seq")
         data = m.get("data") or {}
         if kind == "ping":
+            return
+        if kind == "ha.request":
+            # une demande de Linkivi pour l'API de Home Assistant (§303) : réponse dans Home Assistant, entités partagées seulement
+            if isinstance(seq, int) and (self.after is None or seq > self.after):
+                self.after = seq
+            self.hass.async_create_task(self._answer(data))
             return
         if isinstance(seq, int) and (self.after is None or seq > self.after or kind == "snapshot"):
             self.after = seq

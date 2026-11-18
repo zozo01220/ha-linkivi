@@ -19,6 +19,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .api import LinkivApi, LinkivAuthError, LinkivError
 from .const import CARD_FILE, CARD_URL, CARD_VERSION, DOMAIN, SCAN_INTERVAL
 from .services import async_register_services
+from .share import LinkivShare
 from .stream import LinkivStream
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,6 +43,9 @@ class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         # Listes de lecture (id → nom), relues avec les écrans ; urgences en cours (id → titre), tenues par le canal
         self.playlists: dict[str, str] = {}
         self.emergencies: dict[str, str] = {}
+        # Partage avec Linkivi (§303) : entités montrées sur les écrans sans jeton chez Linkivi
+        self.key_id: str = ""
+        self.share: LinkivShare | None = None
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         try:
@@ -80,12 +84,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator.org_id = str(org.get("id") or entry.entry_id)
     coordinator.org_name = org.get("name") or "Linkivi"
     coordinator.scopes = set((me.get("key") or {}).get("scopes") or [])
+    coordinator.key_id = str((me.get("key") or {}).get("id") or "")
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     coordinator.stream = LinkivStream(hass, coordinator, api)
+    coordinator.share = LinkivShare(hass, coordinator)
+    coordinator.share.compute()
+    coordinator.share.watch(coordinator.stream.send)
+    entry.async_on_unload(coordinator.share.stop)
+    entry.async_on_unload(entry.add_update_listener(_options_changed))
     entry.async_create_background_task(hass, coordinator.stream.run(), f"{DOMAIN}_stream_{entry.entry_id}")
     return True
+
+
+async def _options_changed(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Partage modifié dans les options : Linkivi est prévenu tout de suite."""
+    coordinator = entry.runtime_data
+    if coordinator.stream and coordinator.share:
+        await coordinator.stream.send(coordinator.share.share_message())
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

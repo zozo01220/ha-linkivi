@@ -1,18 +1,22 @@
 {
   "domain": "linkivi",
   "name": "Linkivi",
+  "after_dependencies": [
+    "camera",
+    "recorder"
+  ],
   "codeowners": [
     "@zozo01220"
   ],
   "config_flow": true,
   "dependencies": [
-    "http",
-    "frontend"
+    "frontend",
+    "http"
   ],
   "documentation": "https://github.com/zozo01220/ha-linkivi",
   "integration_type": "hub",
   "iot_class": "cloud_push",
   "issue_tracker": "https://github.com/zozo01220/ha-linkivi/issues",
   "requirements": [],
-  "version": "1.5.0"
+  "version": "1.6.0"
 }

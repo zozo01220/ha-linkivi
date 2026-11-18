@@ -8,16 +8,24 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import SOURCE_REAUTH, ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import SOURCE_REAUTH, ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_API_KEY, CONF_URL
+from homeassistant.core import callback
+from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import LinkivApi, LinkivAuthError, LinkivError, clean_url, pair_start, pair_token
 from .const import DEFAULT_URL, DOMAIN
+from .share import OPT_AREAS, OPT_COMMANDS, OPT_ENTITIES, OPT_LABELS
 
 
 class LinkivConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        return LinkivOptionsFlow()
 
     def __init__(self) -> None:
         self._url = DEFAULT_URL
@@ -152,3 +160,21 @@ class LinkivConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_update_reload_and_abort(entry, data_updates={CONF_API_KEY: key})
             errors["base"] = error or "unknown"
         return self.async_show_form(step_id="reauth_key", data_schema=vol.Schema({vol.Required(CONF_API_KEY): str}), errors=errors)
+
+
+class LinkivOptionsFlow(OptionsFlow):
+    """« Partager avec Linkivi » (§303) : ce que les écrans de Linkivi voient de cette maison, et s'ils peuvent commander ces appareils."""
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+        o = self.config_entry.options
+        schema = vol.Schema(
+            {
+                vol.Optional(OPT_AREAS, default=o.get(OPT_AREAS, [])): selector.AreaSelector(selector.AreaSelectorConfig(multiple=True)),
+                vol.Optional(OPT_LABELS, default=o.get(OPT_LABELS, [])): selector.LabelSelector(selector.LabelSelectorConfig(multiple=True)),
+                vol.Optional(OPT_ENTITIES, default=o.get(OPT_ENTITIES, [])): selector.EntitySelector(selector.EntitySelectorConfig(multiple=True)),
+                vol.Optional(OPT_COMMANDS, default=o.get(OPT_COMMANDS, False)): selector.BooleanSelector(),
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema)
