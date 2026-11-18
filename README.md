@@ -86,6 +86,14 @@ Modifier le tableau de bord › Ajouter une carte › **Écrans Linkivi**. Elle 
 | `list` (par défaut) | « Verre » : une ligne givrée par écran sur un fond dégradé. Un médaillon dont la couleur dit l'état (vert allumé, bleu en veille, orange en cours, gris hors ligne), le redémarrage du player, le menu ⋮ (redémarrer ou éteindre l'appareil, avec confirmation) et un interrupteur lumineux « Écran ». |
 | `cards` | « Écrans » : chaque écran est une petite télé dont l'état se lit sur l'écran (bleu et reflet avec un voyant qui bat, noir en veille, hachuré hors ligne, roue pendant une commande). Dessous : le nom, le bouton d'allumage rond, le redémarrage du player et le menu ⋮. Se met en colonnes selon la largeur. |
 
+**Depuis la carte 2.0 (intégration 1.7)** :
+
+- **Liste diffusée** sous chaque écran : un clic la change, publiée aussitôt ; une bulle « Annuler » remet l'ancienne pendant 10 s. Sans le Pro, la liste passe à droite, en pastille.
+- **Aperçu du direct** dans la télé (style ) ou en vignette (style ), pour un écran allumé et en ligne : une nouvelle image toutes les  minutes (5 par défaut), seulement quand la carte est visible, car chaque image demande une capture à l'appareil.
+- **Fenêtre d'un écran** (clic sur la télé ou la ligne) : grand aperçu, actualisé à l'ouverture puis chaque minute, liste diffusée, état, dernière connexion et commandes.
+- **Alerte d'urgence** : bandeau rouge en tête de carte tant qu'une alerte est en cours, avec « Lever l'alerte » ; « Déclencher une alerte… » dans le menu ⋮ de la carte (appui maintenu 1,5 s), sur les écrans de la carte (filtre ) ou sur tous. Réservé aux administrateurs de Home Assistant, sauf .
+- Options : , , , , .
+
 Une commande montre « en cours » aussitôt (l'état confirmé arrive par le canal temps réel, en quelques secondes) ; si Linkivi refuse, sa raison s'affiche en notification. Les animations s'arrêtent si le système demande moins de mouvement.
 
 ```yaml
