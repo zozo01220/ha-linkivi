@@ -1,24 +1,34 @@
 # Linkivi pour Home Assistant
 
-Voir et commander ses écrans Linkivi depuis Home Assistant : redémarrer le player, redémarrer l'appareil, éteindre l'appareil, éteindre l'écran, le réveiller, et **y afficher un message** (sonnette, lave-linge terminé…).
-Chaque écran devient un **appareil** Home Assistant. À ne pas confondre avec l'intégration Home Assistant **de** Linkivi (lire et commander les appareils d'une maison sur les écrans) : ici, c'est l'inverse.
+[![Version](https://img.shields.io/badge/version-1.7.2-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
-Prérequis : Home Assistant 2024.11 ou plus récent. **Tous les plans** de Linkivi, sans exception : voir les écrans, les commander, y afficher un message, changer la liste, voir l'aperçu du direct et déclencher l'alerte d'urgence (sans installer « Alerte d'urgence » dans le Store). Une autorisation faite avant la 1.7.1 peut manquer l'urgence : reconfigurez l'intégration pour la redemander.
+Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord.
+
+Chaque écran devient un **appareil** Home Assistant. À ne pas confondre avec l'intégration Home Assistant **de** Linkivi (lire et commander les appareils d'une maison sur les écrans) : ici, c'est l'inverse. Les deux se complètent (voir « Montrer les appareils de la maison sur les écrans »).
+
+**Prérequis** : Home Assistant 2024.11 ou plus récent. **Tous les plans** de Linkivi, sans exception, et sans installer « Alerte d'urgence » dans le Store de Linkivi.
 
 ## Installer
 
-1. **Dans Home Assistant** : par HACS (menu ⋮ › Dépôts personnalisés › `https://github.com/zozo01220/ha-linkivi`, catégorie Intégration, une fois le dépôt public créé, voir `PUBLIER.md`), ou à la main : copiez le dossier `custom_components/linkivi` dans le dossier `config/custom_components/` de Home Assistant, puis redémarrez Home Assistant.
+1. **Par HACS** (conseillé) : HACS › menu ⋮ › **Dépôts personnalisés** › `https://github.com/zozo01220/ha-linkivi`, catégorie **Intégration** › Télécharger, puis redémarrez Home Assistant.
+   **À la main** : copiez le dossier `custom_components/linkivi` dans `config/custom_components/` de Home Assistant, puis redémarrez Home Assistant.
 2. Paramètres › Appareils et services › Ajouter une intégration › **Linkivi** › **Se connecter avec un code** : adresse de votre Linkivi (par exemple `https://linkivi.duckdns.org`).
 3. Home Assistant affiche un **lien** et un **code** (8 lettres, `WDJB-MJHT`), valable 10 minutes. Ouvrez le lien : Linkivi s'ouvre (connectez-vous si besoin), vérifiez que le code est le même, choisissez l'organisation si vous en gérez plusieurs, puis **Autoriser**.
-4. Home Assistant reçoit sa clé tout seul : les écrans apparaissent en quelques secondes.
+4. Home Assistant reçoit sa clé tout seul : les écrans apparaissent en quelques secondes. Ceux ajoutés plus tard dans Linkivi apparaissent seuls, **en direct**.
 
 Qui peut autoriser : un administrateur de l'organisation, ou un membre qui publie **sans approbation**. Home Assistant agit ensuite au nom de cette personne, sans approbation. L'accès se retire dans Linkivi, Applications › Home Assistant › « Accès de Home Assistant » ; supprimer l'intégration dans Home Assistant le retire aussi.
 
 **Avancé** : « Coller une clé d'API » marche toujours avec une clé du modèle « Home Assistant » créée dans « API et webhooks » (plan Pro).
 
-**Mise à jour depuis la 1.3** : l'entrée existante garde sa clé collée à la main et passe au temps réel ; rien à refaire.
+## Mettre à jour
 
-Les écrans ajoutés plus tard dans Linkivi apparaissent seuls, **en direct** (voir « Temps réel »).
+Par HACS : la mise à jour apparaît dans HACS (et dans Paramètres › Mises à jour). Installez-la, **redémarrez Home Assistant**, puis rechargez la page avec Ctrl+F5 pour la carte.
+
+**Reconfigurer** (nouvelle autorisation sans rien supprimer) : Paramètres › Appareils et services › **Linkivi** › menu **⋮** de l'organisation › **Reconfigurer** › « Se connecter avec un code », puis « Autoriser » dans Linkivi. La nouvelle clé reçoit tous les accès actuels du modèle « Home Assistant ». Les entités, les automatisations et le partage sont gardés. L'ancienne clé reste listée dans Linkivi (Applications › Home Assistant) : retirez-la si vous voulez.
+
+À faire une fois si votre intégration a été reliée **avant la 1.7.1** : l'autorisation n'a peut-être pas l'urgence (ni la liste diffusée si elle date d'avant la 1.5), et l'action `linkivi.start_emergency` le signale. Reconfigurez comme ci-dessus.
+
+Si Linkivi retire l'accès (clé révoquée ou expirée), Home Assistant demande de lui-même une **nouvelle authentification** sur la carte Linkivi : même parcours, par code ou en collant une clé.
 
 ## Ce que chaque écran offre
 
@@ -29,6 +39,16 @@ Les écrans ajoutés plus tard dans Linkivi apparaissent seuls, **en direct** (v
 | **Redémarrer le player** | bouton | Relance l'application d'affichage. |
 | **Redémarrer l'appareil** | bouton | Redémarre le PC, le Raspberry Pi ou l'appareil Android. |
 | **Éteindre l'appareil** | bouton | Éteint l'appareil. **Linkivi ne peut pas le rallumer** : il faut le bouton ou le courant. |
+| **Liste diffusée** | liste de choix | La liste de lecture de l'écran. En choisir une autre la publie aussitôt, sans approbation. Pas pour un écran de mur ni une borne. |
+| **État** | capteur | En ligne, hors ligne, mise à jour, en veille ou en pause. |
+| **Dernière connexion** | capteur (désactivé par défaut) | Dernier contact de l'écran. |
+| **Aperçu du direct** | caméra | Ce que l'écran affiche (players Android et Raspberry Pi). Une nouvelle image est demandée au plus toutes les 60 s quand on la regarde. Un écran portrait peut arriver couché. |
+
+Et pour l'organisation (appareil « Organisation ») :
+
+| Entité | Type | Rôle |
+|---|---|---|
+| **Urgence en cours** | capteur binaire | Une alerte d'urgence est en cours sur au moins un écran. |
 
 Un bouton n'existe que si le matériel sait faire la commande :
 
@@ -40,19 +60,19 @@ Un bouton n'existe que si le matériel sait faire la commande :
 
 Un écran de **mur** se commande en entier : un ordre sur un écran du mur part sur tous.
 
-Depuis la 1.5 :
+## Actions
 
-| Entité | Type | Rôle |
-|---|---|---|
-| **Liste diffusée** | liste de choix | La liste de lecture de l'écran. En choisir une autre la publie aussitôt, sans approbation. Tous les plans. Pas pour un écran de mur, une borne ou un écran Home Assistant. |
-| **État** | capteur | En ligne, hors ligne, mise à jour, en veille ou en pause. |
-| **Dernière connexion** | capteur (désactivé par défaut) | Dernier contact de l'écran. |
-| **Aperçu du direct** | caméra | Ce que l'écran affiche (players Android et Raspberry Pi). Une nouvelle image est demandée au plus toutes les 60 s quand on la regarde. Un écran portrait peut arriver couché. |
-| **Urgence en cours** | capteur binaire, appareil « Organisation » | Une alerte d'urgence est en cours (si l'intégration « Alerte d'urgence » est installée dans Linkivi). |
+Dans l'éditeur d'automatisations (Ajouter une action › Linkivi) ou dans Outils de développement › Actions :
 
-Actions : `linkivi.show_list` (`playlist` : nom de la liste), `linkivi.start_emergency` (`title` 40 caractères, `message` 300 ; sans cible, sur tous les écrans) et `linkivi.end_emergency` (lève toutes les alertes en cours). Une entrée reliée avant la 1.5 n'a pas les accès « liste » et « urgence » : supprimez l'intégration puis rajoutez-la avec un code.
+| Action | Rôle |
+|---|---|
+| `linkivi.show_message` | Affiche un message par-dessus la diffusion (voir « Afficher un message sur un écran »). |
+| `linkivi.clear_display` | Retire le message tout de suite. |
+| `linkivi.show_list` | Diffuse une autre liste (`playlist` : nom de la liste). |
+| `linkivi.start_emergency` | Déclenche l'alerte d'urgence (`title` 40 caractères, `message` 300) ; sans cible, sur tous les écrans. |
+| `linkivi.end_emergency` | Lève toutes les alertes en cours. |
 
-## Montrer les appareils de la maison sur les écrans (1.6)
+## Montrer les appareils de la maison sur les écrans
 
 Dans Linkivi, Applications › Home Assistant › « Par l'intégration Linkivi » (conseillé). Puis, dans Home Assistant : Paramètres › Appareils et services › Linkivi › **Configurer** › « Partager avec Linkivi » : des pièces, des libellés ou des entités, et « Permettre aux écrans de commander ces appareils » (non par défaut). Les serrures et les alarmes ne se partagent qu'une à une. Linkivi ne garde alors **aucun jeton** de votre Home Assistant et n'a plus besoin du relais : il demande les états, l'historique et les images des caméras à l'intégration, qui ne répond que pour ce qui est partagé.
 
@@ -86,7 +106,7 @@ Modifier le tableau de bord › Ajouter une carte › **Écrans Linkivi**. Elle 
 | `list` (par défaut) | « Verre » : une ligne givrée par écran sur un fond dégradé. Un médaillon dont la couleur dit l'état (vert allumé, bleu en veille, orange en cours, gris hors ligne), le redémarrage du player, le menu ⋮ (redémarrer ou éteindre l'appareil, avec confirmation) et un interrupteur lumineux « Écran ». |
 | `cards` | « Écrans » : chaque écran est une petite télé dont l'état se lit sur l'écran (bleu et reflet avec un voyant qui bat, noir en veille, hachuré hors ligne, roue pendant une commande). Dessous : le nom, le bouton d'allumage rond, le redémarrage du player et le menu ⋮. Se met en colonnes selon la largeur. |
 
-**Depuis la carte 2.0 (intégration 1.7)** :
+Sur chaque écran :
 
 - **Liste diffusée** sous chaque écran : un clic la change, publiée aussitôt ; une bulle « Annuler » remet l'ancienne pendant 10 s. Pour un écran sans commandes, la liste passe à droite, en pastille.
 - **Aperçu du direct** dans la télé (style `cards`) ou en vignette (style `list`), pour un écran allumé et en ligne : une nouvelle image toutes les `preview_interval` minutes (5 par défaut), seulement quand la carte est visible, car chaque image demande une capture à l'appareil.
@@ -107,6 +127,11 @@ show_player_restart: true
 show_device_actions: true           # le menu ⋮ (ou les boutons Appareil / Éteindre)
 show_group_buttons: true            # Tout allumer / Tout éteindre
 hide_offline: false
+show_playlist: true                 # liste diffusée sous chaque écran
+show_preview: true                  # aperçu du direct
+preview_interval: 5                 # minutes entre deux images
+show_emergency: true                # bandeau et menu de l'alerte d'urgence
+emergency_for_all: false            # true : pas seulement les administrateurs
 accent_color: "#2a86ee"             # couleur d'accent (bleu Linkivi par défaut)
 ```
 
@@ -185,11 +210,24 @@ L'intégration n'appelle que l'API publique de Linkivi (voir `/docs/api` sur vot
 | `POST /api/v1/screens/{id}/commands` | `screens:control` | `{"command": "restart-player" \| "reboot" \| "poweroff" \| "screen-off" \| "wake"}`, réponse `202`. |
 | `POST /api/v1/screens/{id}/display` | `screens:control` | `{"title", "message", "look", "durationSeconds", "wake"}`, réponse `202`. |
 | `DELETE /api/v1/screens/{id}/display` | `screens:control` | Retire le message. |
+| `GET /api/v1/playlists`, `PUT /api/v1/screens/{id}/playlist` | `screens:read`, `screens:playlist` | Listes de l'organisation, et changement de la liste diffusée. |
+| `POST /api/v1/screens/{id}/capture` | `screens:control` | Aperçu du direct (image de l'écran). |
+| `GET /api/v1/emergency`, `POST /api/v1/emergency`, `DELETE /api/v1/emergency/{id}` | `emergency:read`, `emergency:write` | Alertes en cours, déclencher, lever. |
+| `POST /api/v1/stream/up` | `screens:read` | Réponses de l'intégration aux demandes de Linkivi (états et images partagés). |
 
 Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Authorization: Bearer lkv_…"`).
 
+## Versions
+
+| Version | Nouveautés |
+|---|---|
+| **1.7.2** | Bouton **Reconfigurer** : nouvelle autorisation par code sans supprimer l'intégration (par exemple pour obtenir l'urgence). |
+| 1.7.1 | Tout sur tous les plans (commandes, messages, aperçu, urgence sans l'application du Store). Carte 2.0.1. |
+| 1.7.0 | Carte « Écrans Linkivi » 2.0 : liste diffusée, aperçu du direct, fenêtre d'un écran, alerte d'urgence. |
+| 1.6.0 | Partage des appareils de la maison avec les écrans de Linkivi, sans jeton ni relais. |
+| 1.5 | Liste diffusée, état, aperçu du direct, urgence. |
+| 1.4 | Connexion par code, temps réel, déclencheurs. |
+
 ## Pas encore essayé
 
-**Version 1.4 (connexion par code, temps réel, déclencheurs)** : jamais lancée dans un vrai Home Assistant. Le code Python n'a pas été exécuté (pas de Python sur le poste de développement). Le serveur est couvert par des tests (`HaPairingTests`, dont le WebSocket et l'attente longue), pas encore à travers le vrai proxy du serveur.
-
-Les entités de l'intégration ont été vues sur une vraie instance (six écrans). En revanche, le code Python n'a jamais été exécuté sur le poste de développement (pas de Python) et **les boutons, l'interrupteur et l'action « Afficher un message » n'ont pas encore été essayés en vrai** (le serveur et l'affichage du message dans le player le sont par des tests et un essai dans le navigateur, pas sur un vrai écran) ; la carte, elle, a été essayée dans un faux Home Assistant (liste, cartes, menu, confirmations, erreurs, filtres) mais **pas dans le vrai** : l'enregistrement par l'intégration, l'éditeur visuel et le rendu sur votre thème sont à vérifier. L'API de Linkivi est couverte par des tests (`ScreenCommandsApiTests`).
+Les entités ont été vues sur une vraie instance (six écrans). Le code Python n'est pas exécuté sur le poste de développement (pas de Python) : **les boutons, l'interrupteur, les actions, le bouton Reconfigurer et la carte n'ont pas encore tous été essayés dans un vrai Home Assistant**. Le serveur de Linkivi est couvert par des tests (`HaPairingTests`, `ScreenCommandsApiTests`) ; la carte a été essayée dans un faux Home Assistant.

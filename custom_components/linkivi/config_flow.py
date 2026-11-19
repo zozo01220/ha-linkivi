@@ -8,7 +8,7 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import SOURCE_REAUTH, ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
+from homeassistant.config_entries import SOURCE_REAUTH, SOURCE_RECONFIGURE, ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_API_KEY, CONF_URL
 from homeassistant.core import callback
 from homeassistant.helpers import selector
@@ -105,6 +105,11 @@ class LinkivConfigFlow(ConfigFlow, domain=DOMAIN):
         org = self._result.get("organisation") or {}
         if self.source == SOURCE_REAUTH:
             return self.async_update_reload_and_abort(self._get_reauth_entry(), data_updates={CONF_URL: self._url, CONF_API_KEY: key})
+        if self.source == SOURCE_RECONFIGURE:
+            entry = self._get_reconfigure_entry()
+            if org.get("id") and entry.unique_id != str(org["id"]):
+                return self.async_abort(reason="wrong_account")   # autorisé dans une autre organisation : on garde l'ancien accès
+            return self.async_update_reload_and_abort(entry, data_updates={CONF_URL: self._url, CONF_API_KEY: key})
         await self.async_set_unique_id(str(org.get("id") or self._url))
         self._abort_if_unique_id_configured(updates={CONF_URL: self._url, CONF_API_KEY: key})
         return self.async_create_entry(title=org.get("name") or "Linkivi", data={CONF_URL: self._url, CONF_API_KEY: key})
@@ -142,6 +147,13 @@ class LinkivConfigFlow(ConfigFlow, domain=DOMAIN):
             }
         )
         return self.async_show_form(step_id="key", data_schema=schema, errors=errors)
+
+    # ---------- « Reconfigurer » (menu ⋮ de l'intégration) : refaire l'autorisation par code ----------
+
+    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Nouvelle autorisation sans supprimer l'intégration (ex. une autorisation d'avant la 1.7.1, sans l'urgence) : entités et partage gardés."""
+        self._url = self._get_reconfigure_entry().data.get(CONF_URL, DEFAULT_URL)
+        return await self.async_step_code()
 
     # ---------- nouvelle autorisation (accès retiré, clé révoquée ou expirée) ----------
 

@@ -51,7 +51,9 @@
     "abort": {
       "already_configured": "Cette organisation est déjà connectée.",
       "reauth_successful": "Accès renouvelé.",
-      "expired": "Le code a expiré : recommencez l'ajout.",
+      "reconfigure_successful": "Nouvelle autorisation enregistrée.",
+      "wrong_account": "Ce code a été autorisé dans une autre organisation : l'intégration garde son accès précédent.",
+      "expired": "Le code a expiré : recommencez.",
       "denied": "L'accès a été refusé dans Linkivi.",
       "cannot_connect": "Linkivi est injoignable à cette adresse."
     }

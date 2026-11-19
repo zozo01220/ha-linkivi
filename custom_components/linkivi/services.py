@@ -169,7 +169,7 @@ async def async_register_services(hass: HomeAssistant) -> None:
         failures = []
         for coordinator, ids in groups.items():
             if "emergency:write" not in coordinator.scopes:
-                failures.append(f"{coordinator.org_name} : cette autorisation date d'avant l'urgence pour tous ; reconfigurez l'intégration (nouvelle autorisation par code).")
+                failures.append(f"{coordinator.org_name} : cette autorisation date d'avant l'urgence pour tous. Dans Paramètres › Appareils et services › Linkivi, menu ⋮ › « Reconfigurer » (intégration 1.7.2 ou plus) : une nouvelle autorisation par code ajoute l'urgence.")
                 continue
             try:
                 await coordinator.api.start_emergency(data["title"], data.get("message"), ids, "Home Assistant")
