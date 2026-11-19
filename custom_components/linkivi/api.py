@@ -93,7 +93,7 @@ class LinkivApi:
             raise LinkivError("Linkivi ne répond pas.") from err
 
     async def me(self) -> dict[str, Any]:
-        """Organisation (« pro » : commandes et messages permis) et clé (accès account:read)."""
+        """Organisation et clé (accès account:read)."""
         return await self._request("GET", "/me")
 
     async def revoke(self) -> None:
@@ -166,7 +166,7 @@ class LinkivApi:
         return await self._request("PUT", f"/screens/{screen_id}/playlist", json={"playlistId": playlist_id})
 
     async def capture(self, screen_id: str) -> dict[str, Any]:
-        """Demande un aperçu du direct (Pro, Android et Raspberry Pi)."""
+        """Demande un aperçu du direct (Android et Raspberry Pi)."""
         return await self._request("POST", f"/screens/{screen_id}/capture")
 
     async def capture_image(self, screen_id: str) -> bytes | None:

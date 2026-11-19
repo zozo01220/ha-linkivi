@@ -1,4 +1,4 @@
-"""Aperçu du direct d'un écran (§301) : image de ce que l'écran affiche. Plan Pro, players Android et Raspberry Pi."""
+"""Aperçu du direct d'un écran (§301) : image de ce que l'écran affiche. Tous les plans (§307), players Android et Raspberry Pi."""
 
 from __future__ import annotations
 
@@ -18,8 +18,6 @@ REFRESH = 60
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator = entry.runtime_data
-    if not coordinator.pro:
-        return
 
     def build(screen_id: str, screen: dict) -> list:
         return [LinkivPreviewCamera(coordinator, screen_id)] if screen.get("capture") else []

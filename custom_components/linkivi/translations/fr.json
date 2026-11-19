@@ -118,7 +118,7 @@
   "services": {
     "show_message": {
       "name": "Afficher un message",
-      "description": "Affiche un message par-dessus la diffusion des écrans choisis, puis revient à la diffusion. Écran en ligne et éveillé (ou réveillé par l'action). Plan Pro.",
+      "description": "Affiche un message par-dessus la diffusion des écrans choisis, puis revient à la diffusion. Écran en ligne et éveillé (ou réveillé par l'action).",
       "fields": {
         "title": {
           "name": "Titre",
@@ -162,7 +162,7 @@
     },
     "start_emergency": {
       "name": "Déclencher une alerte d'urgence",
-      "description": "Plein écran rouge sur les écrans choisis (sur tous, sans cible), jusqu'à « Lever l'alerte ». Plan Pro et intégration « Alerte d'urgence » de Linkivi.",
+      "description": "Plein écran rouge sur les écrans choisis (sur tous, sans cible), jusqu'à « Lever l'alerte ».",
       "fields": {
         "title": {
           "name": "Titre",

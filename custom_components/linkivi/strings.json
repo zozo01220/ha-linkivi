@@ -118,7 +118,7 @@
   "services": {
     "show_message": {
       "name": "Show a message",
-      "description": "Shows a message over the playlist of the chosen screens, then goes back to the playlist. The screen must be online and awake (or woken by the action). Pro plan.",
+      "description": "Shows a message over the playlist of the chosen screens, then goes back to the playlist. The screen must be online and awake (or woken by the action).",
       "fields": {
         "title": {
           "name": "Title",
@@ -162,7 +162,7 @@
     },
     "start_emergency": {
       "name": "Start an emergency alert",
-      "description": "Red full screen on the chosen screens (on all of them without a target), until \"End the emergency alert\". Pro plan and the Linkivi \"Emergency alert\" integration.",
+      "description": "Red full screen on the chosen screens (on all of them without a target), until \"End the emergency alert\".",
       "fields": {
         "title": {
           "name": "Title",

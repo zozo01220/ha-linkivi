@@ -105,12 +105,10 @@ def _has_target(call: ServiceCall) -> bool:
     return any(_ids(call, k) for k in ("entity_id", "device_id", "area_id", "floor_id", "label_id"))
 
 
-async def _run(call: ServiceCall, send, pro_only: bool = True) -> None:
+async def _run(call: ServiceCall, send) -> None:
     """Envoie à chaque écran ; une erreur d'un écran n'empêche pas les autres, et toutes sont rapportées ensemble."""
     failures: list[str] = []
     targets = await _screens_of(call.hass, call)
-    if pro_only and not any(getattr(c, "pro", True) for c, _ in targets):
-        raise ServiceValidationError("Afficher un message sur les écrans demande le plan Pro de Linkivi.")
     for coordinator, screen_id in targets:
         name = coordinator.data.get(screen_id, {}).get("name", screen_id)
         try:
@@ -156,7 +154,7 @@ async def async_register_services(hass: HomeAssistant) -> None:
                 raise LinkivError(f"liste « {name} » introuvable")
             await api.set_playlist(screen_id, pid)
 
-        await _run(call, send, pro_only=False)
+        await _run(call, send)
 
     async def start_emergency(call: ServiceCall) -> None:
         """Déclenche une urgence sur les écrans visés (ou sur tous, sans cible)."""
@@ -171,7 +169,7 @@ async def async_register_services(hass: HomeAssistant) -> None:
         failures = []
         for coordinator, ids in groups.items():
             if "emergency:write" not in coordinator.scopes:
-                failures.append(f"{coordinator.org_name} : l'alerte d'urgence n'est pas disponible (intégration « Alerte d'urgence » de Linkivi, plan Pro ; puis nouvelle autorisation par code).")
+                failures.append(f"{coordinator.org_name} : cette autorisation date d'avant l'urgence pour tous ; reconfigurez l'intégration (nouvelle autorisation par code).")
                 continue
             try:
                 await coordinator.api.start_emergency(data["title"], data.get("message"), ids, "Home Assistant")

@@ -23,8 +23,6 @@ BUTTONS: tuple[ButtonEntityDescription, ...] = (
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator = entry.runtime_data
-    if not coordinator.pro:
-        return   # commandes à distance : plan Pro seulement
 
     def build(screen_id: str, screen: dict) -> list["LinkivButton"]:
         supported = screen.get("commands") or []

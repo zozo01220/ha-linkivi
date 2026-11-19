@@ -151,11 +151,6 @@ class LinkivStream:
         coordinator = self.coordinator
 
         if kind == "snapshot":
-            pro = bool((data.get("organisation") or {}).get("pro", True))
-            if coordinator.pro is not None and pro != coordinator.pro:
-                # passage au Pro (ou retour) : les boutons et l'interrupteur apparaissent (ou disparaissent) au rechargement
-                self.hass.config_entries.async_schedule_reload(coordinator.config_entry.entry_id)
-            coordinator.pro = pro
             coordinator.async_set_updated_data({s["id"]: s for s in data.get("screens") or [] if "id" in s})
             return
         if kind == "screen.changed" and "id" in data:

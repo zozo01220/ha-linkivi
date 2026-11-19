@@ -3,7 +3,7 @@
 Voir et commander ses écrans Linkivi depuis Home Assistant : redémarrer le player, redémarrer l'appareil, éteindre l'appareil, éteindre l'écran, le réveiller, et **y afficher un message** (sonnette, lave-linge terminé…).
 Chaque écran devient un **appareil** Home Assistant. À ne pas confondre avec l'intégration Home Assistant **de** Linkivi (lire et commander les appareils d'une maison sur les écrans) : ici, c'est l'inverse.
 
-Prérequis : Home Assistant 2024.11 ou plus récent. **Tous les plans** de Linkivi : voir les écrans, leur état et leurs événements. **Plan Pro** : commander les écrans et y afficher un message (sur les autres plans, l'intégration ne crée ni les boutons, ni l'interrupteur « Écran », ni les actions).
+Prérequis : Home Assistant 2024.11 ou plus récent. **Tous les plans** de Linkivi, sans exception : voir les écrans, les commander, y afficher un message, changer la liste, voir l'aperçu du direct et déclencher l'alerte d'urgence (sans installer « Alerte d'urgence » dans le Store). Une autorisation faite avant la 1.7.1 peut manquer l'urgence : reconfigurez l'intégration pour la redemander.
 
 ## Installer
 
@@ -47,7 +47,7 @@ Depuis la 1.5 :
 | **Liste diffusée** | liste de choix | La liste de lecture de l'écran. En choisir une autre la publie aussitôt, sans approbation. Tous les plans. Pas pour un écran de mur, une borne ou un écran Home Assistant. |
 | **État** | capteur | En ligne, hors ligne, mise à jour, en veille ou en pause. |
 | **Dernière connexion** | capteur (désactivé par défaut) | Dernier contact de l'écran. |
-| **Aperçu du direct** | caméra | Ce que l'écran affiche (Pro, players Android et Raspberry Pi). Une nouvelle image est demandée au plus toutes les 60 s quand on la regarde. Un écran portrait peut arriver couché. |
+| **Aperçu du direct** | caméra | Ce que l'écran affiche (players Android et Raspberry Pi). Une nouvelle image est demandée au plus toutes les 60 s quand on la regarde. Un écran portrait peut arriver couché. |
 | **Urgence en cours** | capteur binaire, appareil « Organisation » | Une alerte d'urgence est en cours (si l'intégration « Alerte d'urgence » est installée dans Linkivi). |
 
 Actions : `linkivi.show_list` (`playlist` : nom de la liste), `linkivi.start_emergency` (`title` 40 caractères, `message` 300 ; sans cible, sur tous les écrans) et `linkivi.end_emergency` (lève toutes les alertes en cours). Une entrée reliée avant la 1.5 n'a pas les accès « liste » et « urgence » : supprimez l'intégration puis rajoutez-la avec un code.
@@ -88,7 +88,7 @@ Modifier le tableau de bord › Ajouter une carte › **Écrans Linkivi**. Elle 
 
 **Depuis la carte 2.0 (intégration 1.7)** :
 
-- **Liste diffusée** sous chaque écran : un clic la change, publiée aussitôt ; une bulle « Annuler » remet l'ancienne pendant 10 s. Sans le Pro, la liste passe à droite, en pastille.
+- **Liste diffusée** sous chaque écran : un clic la change, publiée aussitôt ; une bulle « Annuler » remet l'ancienne pendant 10 s. Pour un écran sans commandes, la liste passe à droite, en pastille.
 - **Aperçu du direct** dans la télé (style `cards`) ou en vignette (style `list`), pour un écran allumé et en ligne : une nouvelle image toutes les `preview_interval` minutes (5 par défaut), seulement quand la carte est visible, car chaque image demande une capture à l'appareil.
 - **Fenêtre d'un écran** (clic sur la télé ou la ligne) : grand aperçu, actualisé à l'ouverture puis chaque minute, liste diffusée, état, dernière connexion et commandes.
 - **Alerte d'urgence** : bandeau rouge en tête de carte tant qu'une alerte est en cours, avec « Lever l'alerte » ; « Déclencher une alerte… » dans le menu ⋮ de la carte (appui maintenu 1,5 s), sur les écrans de la carte (filtre `screens`) ou sur tous. Réservé aux administrateurs de Home Assistant, sauf `emergency_for_all: true`.
@@ -177,7 +177,7 @@ L'intégration n'appelle que l'API publique de Linkivi (voir `/docs/api` sur vot
 | Appel | Accès | Usage |
 |---|---|---|
 | `POST /api/v1/ha/pair`, `POST /api/v1/ha/pair/token` | sans clé | Appairage par code : demande du code, puis relevé de la réponse toutes les 5 s (`202` en attente, `200` avec la clé, `403` refusé, `410` expiré). |
-| `GET /api/v1/me` | `account:read` | Nom de l'organisation et `pro` (commandes et messages permis). |
+| `GET /api/v1/me` | `account:read` | Nom de l'organisation. |
 | `DELETE /api/v1/me` | `account:read` | Révoque la clé, quand on supprime l'intégration. |
 | `GET /api/v1/stream` (WebSocket) | `screens:read` | Canal temps réel : un état complet (`snapshot`), puis `screen.changed`, `screen.removed` et les événements ; `?after=<seq>` pour reprendre. |
 | `GET /api/v1/stream/next` | `screens:read` | Le même canal en attente longue, si le WebSocket ne passe pas. |

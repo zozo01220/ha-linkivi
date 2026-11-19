@@ -7,7 +7,7 @@
  * Servie par l'intégration (/linkivi/linkivi-screens-card.js) : chargée toute seule, ou déclarée en ressource « module JavaScript ».
  * Sans dépendance : élément natif + shadow DOM.
  */
-const CARD_VERSION = "2.0.0";
+const CARD_VERSION = "2.0.1";
 
 const TEXTS = {
   fr: {
@@ -29,7 +29,7 @@ const TEXTS = {
     preview: "Aperçu du direct", refresh: "Actualiser", updatedAt: (h) => `Mis à jour à ${h}`, noPreview: "Pas d'aperçu pour ce player",
     lastImage: "Dernière image", state: "État", lastSeen: "Dernière connexion", now: "à l'instant", ago: (d) => `il y a ${d}`,
     states: { online: "En ligne", offline: "Hors ligne", updating: "Mise à jour", asleep: "En veille", paused: "En pause" },
-    proOnly: "Aperçu du direct et commandes avec le plan Pro de Linkivi.",
+    noCtl: "Ni aperçu du direct ni commandes pour cet écran.",
     urgKicker: "Alerte d'urgence en cours", urgMore: (n) => ` (+${n})`, endAlert: "Lever l'alerte",
     confirmEnd: "Lever l'alerte d'urgence ?", confirmEndText: "La diffusion reprend tout de suite sur les écrans concernés.", endGo: "Lever l'alerte",
     startAlert: "Déclencher une alerte…", alertTitle: "Déclencher une alerte d'urgence", alertName: "Titre (40 caractères)", alertMsg: "Message (facultatif)",
@@ -59,7 +59,7 @@ const TEXTS = {
     preview: "Live preview", refresh: "Refresh", updatedAt: (h) => `Updated at ${h}`, noPreview: "No preview for this player",
     lastImage: "Last image", state: "Status", lastSeen: "Last seen", now: "just now", ago: (d) => `${d} ago`,
     states: { online: "Online", offline: "Offline", updating: "Updating", asleep: "Asleep", paused: "Paused" },
-    proOnly: "Live preview and commands with the Linkivi Pro plan.",
+    noCtl: "No live preview or commands for this screen.",
     urgKicker: "Emergency alert in progress", urgMore: (n) => ` (+${n})`, endAlert: "End the alert",
     confirmEnd: "End the emergency alert?", confirmEndText: "The playlist resumes at once on the screens concerned.", endGo: "End the alert",
     startAlert: "Start an alert…", alertTitle: "Start an emergency alert", alertName: "Title (40 characters)", alertMsg: "Message (optional)",
@@ -218,7 +218,7 @@ button.tv:focus-visible,.pl:focus-visible,.r .hit:focus-visible,.plc:focus-visib
 .th .dot{position:absolute;right:4px;top:4px;width:7px;height:7px;border-radius:50%;background:#7dffb4;z-index:2;box-shadow:0 0 0 1.5px rgba(0,0,0,.45)}
 .th .scrim{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:1;display:grid;place-items:center}
 .th .scrim .spin{border-color:rgba(255,255,255,.3);border-top-color:var(--lk-warn)}
-/* sans commandes (plan sans Pro) : la liste diffusée passe à droite, en pastille */
+/* sans commandes (écran qui n'en a pas) : la liste diffusée passe à droite, en pastille */
 .plc{display:inline-flex;align-items:center;gap:6px;border:0;background:color-mix(in srgb,var(--lk-text) 8%,transparent);color:var(--lk-text);border-radius:16px;padding:6px 8px 6px 11px;font-size:12.5px;max-width:46%;flex:none;min-width:0}
 .plc svg{width:14px;height:14px;flex:none}.plc .cv{width:13px;height:13px;opacity:.7}
 .plc .lb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -403,7 +403,7 @@ class LinkivScreensCard extends HTMLElement {
       const online = hass.states[s.online]?.state === "on";
       const swState = hass.states[s.sw]?.state;
       const opt = this._optimistic[s.id];
-      s.pro = !!(s.sw || s.player || s.reboot || s.poweroff || s.cam);
+      s.ctl = !!(s.sw || s.player || s.reboot || s.poweroff || s.cam);
       s.swOn = opt && opt.until > now ? opt.on : swState === "on";
       s.swDisabled = !s.sw || swState === undefined || swState === "unavailable";
       s.isOnline = online;
@@ -441,7 +441,7 @@ class LinkivScreensCard extends HTMLElement {
 
   /**
    * « on » (allumé), « sleep », « off » (hors ligne) : la classe visuelle d'un écran. D'après le capteur « État » quand il existe ;
-   * sans interrupteur (plan sans Pro), un écran en ligne est allumé (la 1.2 le disait « en veille »).
+   * sans interrupteur, un écran en ligne est allumé (la 1.2 le disait « en veille »).
    */
   _look(s) {
     if (!s.isOnline || s.status === "offline") return "off";
@@ -551,10 +551,10 @@ class LinkivScreensCard extends HTMLElement {
       const icon = s.pending ? ICON.restart : look === "off" ? ICON.cloud : look === "sleep" ? (s.status === "paused" ? ICON.pause : ICON.moon) : deviceIcon(s.model);
       const av = s.shot ? `<div class="th"><img class="shot" src="${esc(s.shot)}" alt="" onerror="this.remove()"><i class="dot"></i></div>`
         : `<div class="av ${state} ${wide ? "wide" : ""}">${icon}</div>`;
-      const st = s.pending ? `<span class="spin"></span> ${esc(s.pending)}` : look === "on" && (!s.status || s.status === "online") ? "" : `<span class="st">${esc(this._stateLabel(s))}</span>${s.pro && s.playlist && this._config.show_playlist ? " · " : ""}`;
-      const sub = s.pro ? `${st}${this._plLink(s)}` : (st || esc([s.model, s.area].filter(Boolean).join(" · ")));
+      const st = s.pending ? `<span class="spin"></span> ${esc(s.pending)}` : look === "on" && (!s.status || s.status === "online") ? "" : `<span class="st">${esc(this._stateLabel(s))}</span>${s.ctl && s.playlist && this._config.show_playlist ? " · " : ""}`;
+      const sub = s.ctl ? `${st}${this._plLink(s)}` : (st || esc([s.model, s.area].filter(Boolean).join(" · ")));
       const toggle = s.sw ? `<button class="pill ${s.swOn ? "" : "off"}" data-act="toggle" data-id="${id}" ${s.swDisabled ? "disabled" : ""} title="${esc(s.swOn ? t.turnOff : t.turnOn)}" aria-label="${esc(s.swOn ? t.screenOn : t.screenOff)}"></button>`
-        : this._plLink(s, true);   // sans Pro : la liste passe à droite, en pastille
+        : this._plLink(s, true);   // sans commandes : la liste passe à droite, en pastille
       return `<div class="r ${look === "off" ? "out" : ""} ${this._menu === s.id || this._plmenu === s.id ? "open" : ""}">
         <button class="hit" data-act="open" data-id="${id}" aria-label="${esc(s.name)}"></button>
         ${av}
@@ -591,13 +591,13 @@ class LinkivScreensCard extends HTMLElement {
     if (!s) return "";
     const t = this._t, id = esc(s.id), look = this._look(s);
     let hero;
-    if (s.pro && s.pic) {
+    if (s.ctl && s.pic) {
       const url = `${s.pic}${s.pic.includes("?") ? "&" : "?"}lkd=${this._tick}`;
       hero = `<div class="hero ${look === "off" ? "old" : ""}"><img class="shot" src="${esc(url)}" alt="${esc(t.preview)}" data-act="shot-load"
           onerror="this.style.display='none'">
         <span class="meta">${esc(look === "off" ? t.lastImage : this._shotAt ? t.updatedAt(this._shotAt) : t.preview)}</span>
         ${look !== "off" ? `<button class="re" data-act="refresh" ${this._refreshUntil > Date.now() ? "disabled" : ""}>${ICON.restart}${esc(t.refresh)}</button>` : ""}</div>`;
-    } else if (s.pro) hero = `<div class="hero"><div class="msg">${deviceIcon(s.model)}<span>${esc(t.noPreview)}</span></div></div>`;
+    } else if (s.ctl) hero = `<div class="hero"><div class="msg">${deviceIcon(s.model)}<span>${esc(t.noPreview)}</span></div></div>`;
     else hero = "";
     const pl = this._config.show_playlist && s.playlist
       ? `<label class="fld"><span class="k">${esc(t.playlist)}</span><select data-change="plsel" data-id="${id}" ${s.plOptions.length ? "" : "disabled"}>
@@ -612,7 +612,7 @@ class LinkivScreensCard extends HTMLElement {
         ${s.player ? `<button class="hbtn" data-act="player" data-id="${id}" ${s.isOnline && !s.pending ? "" : "disabled"}>${ICON.restart}${esc(t.restartPlayer)}</button>` : ""}
         ${s.reboot ? `<button class="hbtn" data-act="reboot" data-id="${id}" ${s.isOnline && !s.pending ? "" : "disabled"}>${ICON.restartAlert}${esc(t.restartDevice)}</button>` : ""}
         ${s.poweroff ? `<button class="hbtn" data-act="poweroff" data-id="${id}" ${s.isOnline && !s.pending ? "" : "disabled"}>${ICON.power}${esc(t.powerOffDevice)}</button>` : ""}</div>` : "";
-    const note = s.pro ? "" : `<div class="hnote">${ICON.info}${esc(t.proOnly)}</div>`;
+    const note = s.ctl ? "" : `<div class="hnote">${ICON.info}${esc(t.noCtl)}</div>`;
     void b;
     return `<div class="ov" data-act="detail-bg"><div class="hdlg" role="dialog" aria-modal="true" aria-label="${esc(s.name)}">
       <div class="dh"><button class="ib" data-act="detail-close" aria-label="${esc(t.close)}">${ICON.close}</button>

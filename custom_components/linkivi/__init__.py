@@ -37,10 +37,8 @@ class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry, api: LinkivApi) -> None:
         super().__init__(hass, _LOGGER, name=DOMAIN, config_entry=entry, update_interval=SCAN_INTERVAL)
         self.api = api
-        # Plan Pro : commandes et messages permis (sur les autres plans, ni boutons ni interrupteur ni actions)
-        self.pro: bool | None = None
         self.stream: LinkivStream | None = None
-        # Accès de la clé (/me) : l'urgence n'est là que si « Alerte d'urgence » est installée dans Linkivi
+        # Accès de la clé (/me) : une autorisation d'avant la 1.7.1 peut manquer l'urgence
         self.scopes: set[str] = set()
         self.org_id: str = ""
         self.org_name: str = "Linkivi"
@@ -84,7 +82,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except LinkivError as err:
         raise ConfigEntryNotReady(str(err)) from err
     org = me.get("organisation") or {}
-    coordinator.pro = bool(org.get("pro", True))
     coordinator.org_id = str(org.get("id") or entry.entry_id)
     coordinator.org_name = org.get("name") or "Linkivi"
     coordinator.scopes = set((me.get("key") or {}).get("scopes") or [])

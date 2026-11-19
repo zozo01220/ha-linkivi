@@ -30,7 +30,7 @@ TRIGGERS = {
     "emergency.acknowledged": "emergency",
 }
 
-# Commandes acceptées par POST /screens/{id}/commands (module « Écrans », accès screens:control, plan Pro).
+# Commandes acceptées par POST /screens/{id}/commands (module « Écrans », accès screens:control, tous les plans).
 CMD_RESTART_PLAYER = "restart-player"
 CMD_REBOOT = "reboot"
 CMD_POWER_OFF = "poweroff"
