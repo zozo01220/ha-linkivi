@@ -1,0 +1,84 @@
+blueprint:
+  name: Linkivi – Redémarrer un écran qui ne répond plus (prise connectée)
+  description: >-
+    Si un écran Linkivi ne répond plus depuis un moment, sa prise connectée est coupée puis rallumée pour relancer
+    le boîtier. Une notification peut vous prévenir.
+  domain: automation
+  source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/chien-de-garde.yaml
+  input:
+    online:
+      name: Écran
+      description: Le capteur « En ligne » de l'écran Linkivi.
+      selector:
+        entity:
+          integration: linkivi
+          domain: binary_sensor
+          device_class: connectivity
+    plug:
+      name: Prise connectée
+      description: La prise qui alimente le boîtier ou le PC de l'écran.
+      selector:
+        entity:
+          domain: switch
+    offline_for:
+      name: Hors ligne depuis
+      default:
+        minutes: 10
+      selector:
+        duration:
+    off_seconds:
+      name: Coupure
+      description: Temps sans courant avant de rallumer.
+      default: 15
+      selector:
+        number:
+          min: 5
+          max: 120
+          unit_of_measurement: s
+    notify:
+      name: Prévenir (facultatif)
+      description: Une entité de notification (téléphone…). Laisser vide pour ne prévenir personne.
+      default: ""
+      selector:
+        entity:
+          domain: notify
+
+mode: single
+max_exceeded: silent
+
+variables:
+  notify: !input notify
+  off_seconds: !input off_seconds
+
+triggers:
+  - trigger: state
+    entity_id: !input online
+    to: "off"
+    for: !input offline_for
+
+actions:
+  - action: switch.turn_off
+    target:
+      entity_id: !input plug
+  - delay:
+      seconds: "{{ off_seconds }}"
+  - action: switch.turn_on
+    target:
+      entity_id: !input plug
+  - if:
+      - condition: template
+        value_template: "{{ notify != '' }}"
+    then:
+      - action: notify.send_message
+        target:
+          entity_id: "{{ notify }}"
+        data:
+          title: Linkivi
+          message: "{{ state_attr(trigger.entity_id, 'friendly_name') }} ne répondait plus : sa prise a été coupée puis rallumée."
+  # un seul essai par panne : on attend que l'écran revienne (ou 1 h) avant de pouvoir recommencer
+  - wait_for_trigger:
+      - trigger: state
+        entity_id: !input online
+        to: "on"
+    timeout:
+      hours: 1

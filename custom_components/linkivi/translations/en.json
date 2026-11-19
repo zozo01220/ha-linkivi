@@ -276,5 +276,18 @@
         }
       }
     }
+  },
+  "issues": {
+    "restart_required": {
+      "title": "Linkivi: restart Home Assistant",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Restart Home Assistant",
+            "description": "Linkivi {disk} is installed, but Home Assistant still runs {loaded}. Restart Home Assistant to use the new version. It takes about a minute."
+          }
+        }
+      }
+    }
   }
 }

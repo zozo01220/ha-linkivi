@@ -1,0 +1,80 @@
+blueprint:
+  name: Linkivi – Fin de cycle d'un appareil
+  description: >-
+    Lave-linge, sèche-linge, lave-vaisselle… Quand la puissance mesurée par une prise connectée retombe sous un seuil
+    après avoir tourné, une carte discrète s'affiche dans un coin des écrans choisis. La diffusion continue.
+  domain: automation
+  source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/fin-de-cycle.yaml
+  input:
+    power:
+      name: Puissance de l'appareil
+      description: Capteur de puissance (W) de la prise connectée.
+      selector:
+        entity:
+          domain: sensor
+          device_class: power
+    running:
+      name: Seuil « en marche »
+      description: Au-dessus, l'appareil tourne.
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 3000
+          unit_of_measurement: W
+    idle:
+      name: Seuil « terminé »
+      description: En dessous, pendant le délai ci-dessous, le cycle est fini.
+      default: 5
+      selector:
+        number:
+          min: 0
+          max: 500
+          unit_of_measurement: W
+    wait:
+      name: Délai
+      default:
+        minutes: 3
+      selector:
+        duration:
+    screens:
+      name: Écrans
+      selector:
+        target:
+          entity:
+            integration: linkivi
+    title:
+      name: Titre
+      default: Le lave-linge est terminé
+      selector:
+        text:
+    message:
+      name: Message
+      default: Pensez à le vider.
+      selector:
+        text:
+
+mode: single
+
+# l'appareil démarre (au-dessus du seuil « en marche »), puis on attend qu'il retombe sous le seuil « terminé » pendant le délai (6 h au plus)
+triggers:
+  - trigger: numeric_state
+    entity_id: !input power
+    above: !input running
+
+actions:
+  - wait_for_trigger:
+      - trigger: numeric_state
+        entity_id: !input power
+        below: !input idle
+        for: !input wait
+    timeout:
+      hours: 6
+    continue_on_timeout: false
+  - action: linkivi.show_message
+    target: !input screens
+    data:
+      title: !input title
+      message: !input message
+      place: corner
+      tag: fin-de-cycle

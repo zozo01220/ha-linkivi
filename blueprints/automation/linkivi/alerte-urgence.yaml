@@ -1,0 +1,69 @@
+blueprint:
+  name: Linkivi – Fuite, fumée, CO… alerte d'urgence sur tous les écrans
+  description: >-
+    Dès qu'un des capteurs choisis passe à « on » (fuite d'eau, fumée, monoxyde de carbone, alarme…), l'alerte d'urgence
+    s'affiche en rouge plein écran sur les écrans Linkivi, même ceux en veille. Elle se lève toute seule quand tous les capteurs
+    sont revenus à la normale (option).
+  domain: automation
+  source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/alerte-urgence.yaml
+  input:
+    sensors:
+      name: Capteurs
+      description: Un ou plusieurs capteurs binaires (fuite, fumée, CO, gaz, alarme…).
+      selector:
+        entity:
+          domain: binary_sensor
+          multiple: true
+    title:
+      name: Titre de l'alerte
+      description: 40 caractères au plus, en capitales sur l'écran.
+      default: Fuite d'eau
+      selector:
+        text:
+    message:
+      name: Message
+      default: Une fuite d'eau est détectée. Coupez l'arrivée d'eau.
+      selector:
+        text:
+          multiline: true
+    auto_end:
+      name: Lever l'alerte au retour à la normale
+      description: Quand tous les capteurs sont revenus à « off ». Sinon, levez-la vous-même (action linkivi.end_emergency, ou dans Linkivi).
+      default: true
+      selector:
+        boolean:
+
+mode: queued
+
+variables:
+  sensors: !input sensors
+  auto_end: !input auto_end
+
+triggers:
+  - trigger: state
+    entity_id: !input sensors
+    to: "on"
+    id: start
+  - trigger: state
+    entity_id: !input sensors
+    to: "off"
+    id: end
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: start
+        sequence:
+          # sur tous les écrans : sans cible, l'alerte part partout
+          - action: linkivi.start_emergency
+            data:
+              title: !input title
+              message: !input message
+      - conditions:
+          - condition: trigger
+            id: end
+          - condition: template
+            value_template: "{{ auto_end and sensors | select('is_state', 'on') | list | count == 0 }}"
+        sequence:
+          - action: linkivi.end_emergency

@@ -12,12 +12,13 @@
   "config_flow": true,
   "dependencies": [
     "frontend",
-    "http"
+    "http",
+    "repairs"
   ],
   "documentation": "https://github.com/zozo01220/ha-linkivi",
   "integration_type": "hub",
   "iot_class": "cloud_push",
   "issue_tracker": "https://github.com/zozo01220/ha-linkivi/issues",
   "requirements": [],
-  "version": "1.8.0"
+  "version": "1.8.1"
 }

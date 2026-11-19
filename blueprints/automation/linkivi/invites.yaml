@@ -1,0 +1,53 @@
+blueprint:
+  name: Linkivi – Mode invité (ou location courte durée)
+  description: >-
+    Quand le mode invité s'active (un interrupteur, ou un calendrier de réservations), les écrans choisis passent sur
+    la liste « invités » (bienvenue, QR du Wi-Fi, consignes…) ; ils reviennent à leur liste habituelle quand il s'arrête.
+  domain: automation
+  source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/invites.yaml
+  input:
+    guests:
+      name: Mode invité
+      description: Interrupteur, capteur ou calendrier (« on » pendant un séjour, par exemple un calendrier iCal de réservations).
+      selector:
+        entity:
+          domain: [input_boolean, binary_sensor, switch, calendar]
+    screens:
+      name: Écrans
+      selector:
+        target:
+          entity:
+            integration: linkivi
+    guest_list:
+      name: Liste pour les invités
+      description: Le nom exact de la liste de lecture dans Linkivi.
+      default: Invités
+      selector:
+        text:
+    normal_list:
+      name: Liste habituelle
+      default: Accueil
+      selector:
+        text:
+
+mode: queued
+
+triggers:
+  - trigger: state
+    entity_id: !input guests
+    to: "on"
+    id: arrive
+  - trigger: state
+    entity_id: !input guests
+    to: "off"
+    id: leave
+
+actions:
+  - action: linkivi.show_list
+    target: !input screens
+    data:
+      playlist: "{{ iif(trigger.id == 'arrive', guest_list, normal_list) }}"
+
+variables:
+  guest_list: !input guest_list
+  normal_list: !input normal_list

@@ -1,0 +1,105 @@
+blueprint:
+  name: Linkivi – Sonnette sur les écrans
+  description: >-
+    Quand on sonne, l'image de la caméra s'affiche en carte dans un coin des écrans choisis,
+    sans couper ce qu'ils diffusent. Une nouvelle sonnerie remplace la carte au lieu de s'empiler.
+  domain: automation
+  source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/sonnette.yaml
+  input:
+    doorbell:
+      name: Sonnette
+      description: Capteur ou bouton qui passe à « on » quand on sonne.
+      selector:
+        entity:
+          domain: [binary_sensor, input_boolean, switch]
+    camera:
+      name: Caméra
+      description: Caméra dont l'image accompagne le message (facultatif).
+      default: ""
+      selector:
+        entity:
+          domain: camera
+    screens:
+      name: Écrans
+      description: Écrans Linkivi, appareils ou pièces où afficher la carte.
+      selector:
+        target:
+          entity:
+            integration: linkivi
+    title:
+      name: Titre
+      default: Quelqu'un sonne au portail
+      selector:
+        text:
+    corner:
+      name: Coin
+      default: bottom_right
+      selector:
+        select:
+          options:
+            - label: Bas droite
+              value: bottom_right
+            - label: Bas gauche
+              value: bottom_left
+            - label: Haut droite
+              value: top_right
+            - label: Haut gauche
+              value: top_left
+    duration:
+      name: Durée
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 600
+          unit_of_measurement: s
+    live:
+      name: Image en direct
+      description: L'image de la caméra est rafraîchie toutes les 2 secondes pendant l'affichage.
+      default: false
+      selector:
+        boolean:
+    wake:
+      name: Réveiller les écrans en veille
+      default: false
+      selector:
+        boolean:
+
+mode: restart
+
+variables:
+  camera: !input camera
+
+triggers:
+  - trigger: state
+    entity_id: !input doorbell
+    to: "on"
+
+actions:
+  - if:
+      - condition: template
+        value_template: "{{ camera != '' }}"
+    then:
+      - action: linkivi.show_message
+        target: !input screens
+        data:
+          title: !input title
+          look: attention
+          place: corner
+          corner: !input corner
+          duration: !input duration
+          wake: !input wake
+          tag: sonnette
+          camera: !input camera
+          live: !input live
+    else:
+      - action: linkivi.show_message
+        target: !input screens
+        data:
+          title: !input title
+          look: attention
+          place: corner
+          corner: !input corner
+          duration: !input duration
+          wake: !input wake
+          tag: sonnette

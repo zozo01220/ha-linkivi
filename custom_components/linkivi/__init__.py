@@ -22,6 +22,7 @@ from .const import CARD_FILE, CARD_URL, CARD_VERSION, DOMAIN, SCAN_INTERVAL
 from .services import async_register_services
 from .share import LinkivShare
 from .stream import LinkivStream
+from .update_check import async_watch_updates
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -68,6 +69,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     await hass.http.async_register_static_paths([StaticPathConfig(CARD_URL, str(path), False)])
     add_extra_js_url(hass, f"{CARD_URL}?v={CARD_VERSION}")
     await async_register_services(hass)
+    await async_watch_updates(hass)   # après une mise à jour par HACS : réparation « Redémarrage nécessaire » (§310)
     return True
 
 

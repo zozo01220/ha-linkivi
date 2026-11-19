@@ -17,7 +17,7 @@ Les publications suivantes : les deux mêmes commandes (la branche est refaite �
 ## 2. Publier une version
 
 1. Mettre `version` à jour dans `custom_components/linkivi/manifest.json` (ex. `1.5.0`).
-2. Dans le dépôt public : **Releases › Draft a new release**, étiquette `v1.5.0`, notes de version.
+2. Dans le dépôt public : **Releases › Draft a new release**, étiquette `v1.5.0`, notes de version. **Indispensable** : HACS propose la dernière *Release*, pas la dernière étiquette ; une étiquette seule n'apparaît pas dans Home Assistant.
 3. Les contrôles **hassfest** et **HACS** tournent tout seuls (`.github/workflows/validate.yml`) : ils doivent être verts.
 
 ## 3. Installer par HACS (chez un utilisateur)

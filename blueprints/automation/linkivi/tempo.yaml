@@ -1,0 +1,87 @@
+blueprint:
+  name: Linkivi – Jour Tempo de demain (ou tout autre signal du soir)
+  description: >-
+    À l'heure choisie, si le capteur de la couleur du lendemain (EDF Tempo, Ecowatt…) prend une des valeurs à signaler,
+    un message s'affiche sur les écrans : en carte dans un coin ou dans le bandeau. Le texte peut reprendre la valeur du capteur.
+  domain: automation
+  source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/tempo.yaml
+  input:
+    color:
+      name: Couleur de demain
+      description: Le capteur qui donne la couleur (ou le signal) du lendemain.
+      selector:
+        entity:
+          domain: [sensor, select, input_select]
+    values:
+      name: Valeurs à signaler
+      description: Telles que le capteur les écrit (ex. Rouge, Blanc, red, white, TEMPO_ROUGE…). Une par ligne.
+      default: [Rouge, Blanc]
+      selector:
+        text:
+          multiple: true
+    at:
+      name: Heure du message
+      default: "19:00:00"
+      selector:
+        time:
+    screens:
+      name: Écrans
+      selector:
+        target:
+          entity:
+            integration: linkivi
+    title:
+      name: Titre
+      description: « [couleur] » est remplacé par la valeur du capteur.
+      default: "Demain : jour [couleur]"
+      selector:
+        text:
+    message:
+      name: Message
+      default: Lancez les machines avant 6 h demain matin.
+      selector:
+        text:
+    place:
+      name: Place
+      default: corner
+      selector:
+        select:
+          options:
+            - label: Coin
+              value: corner
+            - label: Bandeau
+              value: banner
+    duration:
+      name: Durée
+      default: 3600
+      selector:
+        number:
+          min: 60
+          max: 3600
+          unit_of_measurement: s
+
+mode: single
+
+variables:
+  color_entity: !input color
+  values: !input values
+  title_tpl: !input title
+
+triggers:
+  - trigger: time
+    at: !input at
+
+conditions:
+  - condition: template
+    value_template: "{{ states(color_entity) | lower in values | map('lower') | list }}"
+
+actions:
+  - action: linkivi.show_message
+    target: !input screens
+    data:
+      title: "{{ title_tpl | replace('[couleur]', states(color_entity)) }}"
+      message: !input message
+      look: attention
+      place: !input place
+      duration: !input duration
+      tag: tempo

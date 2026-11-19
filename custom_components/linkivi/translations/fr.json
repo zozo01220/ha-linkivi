@@ -276,5 +276,18 @@
         }
       }
     }
+  },
+  "issues": {
+    "restart_required": {
+      "title": "Linkivi : redémarrer Home Assistant",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Redémarrer Home Assistant",
+            "description": "Linkivi {disk} est installé, mais Home Assistant fait encore tourner la {loaded}. Redémarrez Home Assistant pour utiliser la nouvelle version. Cela prend environ une minute."
+          }
+        }
+      }
+    }
   }
 }

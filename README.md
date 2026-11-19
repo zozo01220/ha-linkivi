@@ -1,8 +1,8 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.7.2-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.8.1-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
-Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord.
+Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Huit blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
 Chaque écran devient un **appareil** Home Assistant. À ne pas confondre avec l'intégration Home Assistant **de** Linkivi (lire et commander les appareils d'une maison sur les écrans) : ici, c'est l'inverse. Les deux se complètent (voir « Montrer les appareils de la maison sur les écrans »).
 
@@ -23,6 +23,8 @@ Qui peut autoriser : un administrateur de l'organisation, ou un membre qui publi
 ## Mettre à jour
 
 Par HACS : la mise à jour apparaît dans HACS (et dans Paramètres › Mises à jour). Installez-la, **redémarrez Home Assistant**, puis rechargez la page avec Ctrl+F5 pour la carte.
+
+Depuis la 1.8.1, tant que Home Assistant n'a pas redémarré après une mise à jour, une **réparation « Linkivi : redémarrer Home Assistant »** apparaît dans Paramètres (vérifiée au démarrage puis toutes les 5 minutes) ; son bouton **Envoyer** redémarre Home Assistant. Sans redémarrage, Home Assistant continue de faire tourner l'ancienne version, même si les nouveaux fichiers sont installés.
 
 **Reconfigurer** (nouvelle autorisation sans rien supprimer) : Paramètres › Appareils et services › **Linkivi** › menu **⋮** de l'organisation › **Reconfigurer** › « Se connecter avec un code », puis « Autoriser » dans Linkivi. La nouvelle clé reçoit tous les accès actuels du modèle « Home Assistant ». Les entités, les automatisations et le partage sont gardés. L'ancienne clé reste listée dans Linkivi (Applications › Home Assistant) : retirez-la si vous voulez.
 
@@ -247,7 +249,8 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
-| **1.8.0** | Place **Coin** (carte posée sur la diffusion), image d'une caméra ou d'une adresse, image en direct, étiquette ; entités **Message** et **Tous les écrans** (`notify`) ; capteurs **Batterie** et **En charge** ; actions et conditions d'appareil. |
+| **1.8.1** | Réparation **« Redémarrage nécessaire »** après une mise à jour, avec un bouton qui redémarre Home Assistant. Huit **blueprints** et leurs automatisations équivalentes ([AUTOMATISATIONS.md](AUTOMATISATIONS.md)). |
+| 1.8.0 | Place **Coin** (carte posée sur la diffusion), image d'une caméra ou d'une adresse, image en direct, étiquette ; entités **Message** et **Tous les écrans** (`notify`) ; capteurs **Batterie** et **En charge** ; actions et conditions d'appareil. |
 | 1.7.2 | Bouton **Reconfigurer** : nouvelle autorisation par code sans supprimer l'intégration (par exemple pour obtenir l'urgence). |
 | 1.7.1 | Tout sur tous les plans (commandes, messages, aperçu, urgence sans l'application du Store). Carte 2.0.1. |
 | 1.7.0 | Carte « Écrans Linkivi » 2.0 : liste diffusée, aperçu du direct, fenêtre d'un écran, alerte d'urgence. |
