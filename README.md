@@ -43,12 +43,16 @@ Si Linkivi retire l'accès (clé révoquée ou expirée), Home Assistant demande
 | **État** | capteur | En ligne, hors ligne, mise à jour, en veille ou en pause. |
 | **Dernière connexion** | capteur (désactivé par défaut) | Dernier contact de l'écran. |
 | **Aperçu du direct** | caméra | Ce que l'écran affiche (players Android et Raspberry Pi). Une nouvelle image est demandée au plus toutes les 60 s quand on la regarde. Un écran portrait peut arriver couché. |
+| **Message** | notification | Pour l'action `notify.send_message` : une carte en coin (bas droite, 15 s), la diffusion continue. |
+| **Batterie** et **En charge** | capteur, capteur binaire | Smartphones et tablettes Android seulement : niveau et branché ou non. |
+
 
 Et pour l'organisation (appareil « Organisation ») :
 
 | Entité | Type | Rôle |
 |---|---|---|
 | **Urgence en cours** | capteur binaire | Une alerte d'urgence est en cours sur au moins un écran. |
+| **Tous les écrans** | notification | `notify.send_message` sur tous les écrans en ligne et éveillés. |
 
 Un bouton n'existe que si le matériel sait faire la commande :
 
@@ -146,26 +150,48 @@ Deux actions, dans l'éditeur d'automatisations (Ajouter une action › Linkivi)
 | `linkivi.show_message` | Affiche un message par-dessus la diffusion des écrans choisis, puis la diffusion reprend avec le contenu suivant. |
 | `linkivi.clear_display` | Retire le message tout de suite. |
 
-Champs de `show_message` : `title` (60 caractères) ou `message` (300) au moins un des deux ; `look` : `information` (clair, par défaut) ou `attention` (ambre) ; `duration` en secondes, de 5 à 3600 (30 par défaut) ; `wake` : réveille un écran en veille pour la durée du message. Les écrans se choisissent comme n'importe quel appareil : un écran, une pièce (aire Home Assistant) ou plusieurs.
+Champs de `show_message` : `title` (60 caractères) ou `message` (300) au moins un des deux ; `look` : `information` (clair, par défaut) ou `attention` (ambre) ; `place` : `full` (plein écran, par défaut), `banner` (bandeau) ou `corner` (carte dans un coin, la diffusion continue) ; `corner` : `bottom_right` (défaut), `bottom_left`, `top_right` ou `top_left` ; `duration` en secondes, de 5 à 3600 (vide : 30 s, 15 s en coin) ; `wake` : réveille un écran en veille pour la durée du message ; `camera` : l'image d'une caméra de Home Assistant, ou `image_url` : une image à une adresse (lue par Home Assistant, 3 Mo au plus) ; `live` : l'image de la caméra est rafraîchie toutes les 2 s (mention « En direct ») ; `tag` : une carte de même étiquette remplace l'ancienne. Les écrans se choisissent comme n'importe quel appareil : un écran, une pièce (aire Home Assistant) ou plusieurs.
 
-Règles : l'écran doit être **en ligne** (un message de sonnette qui arrive trop tard ne sert à rien) et **éveillé**, sauf avec `wake: true` ; un nouveau message remplace le précédent ; une alerte d'urgence passe devant. Si Linkivi refuse, Home Assistant affiche la raison de chaque écran.
+Règles : l'écran doit être **en ligne** (un message de sonnette qui arrive trop tard ne sert à rien) et **éveillé**, sauf avec `wake: true` ; en plein écran, un nouveau message remplace le précédent ; en coin, deux cartes au plus s'empilent (la plus ancienne réduite à son titre) ; sur un mur d'écrans, seul l'écran du coin choisi montre la carte ; une alerte d'urgence passe devant. L'écran ne contacte jamais la caméra : Home Assistant lit l'image et l'envoie à Linkivi. Si Linkivi refuse, Home Assistant affiche la raison de chaque écran.
 
 ```yaml
 automation:
-  - alias: Annoncer un visiteur
-    trigger:
-      - platform: state
+  - alias: Sonnette sur la télé du salon
+    triggers:
+      - trigger: state
         entity_id: binary_sensor.sonnette
         to: "on"
-    action:
+    actions:
       - action: linkivi.show_message
         target:
-          area_id: accueil
+          area_id: salon
         data:
-          title: Un visiteur est à l'accueil
-          message: Merci d'aller l'accueillir
-          duration: 30
+          title: Quelqu'un sonne au portail
+          look: attention
+          place: corner
+          camera: camera.portail
+          tag: sonnette
+          duration: 20
 ```
+
+Plus simple : chaque écran a une entité **Message** (`notify.<écran>_message`) et l'organisation une entité **Tous les écrans**, utilisables par `notify.send_message` et par tous les blueprints qui notifient :
+
+```yaml
+- action: notify.send_message
+  target:
+    entity_id: notify.salon_message
+  data:
+    title: Le lave-linge est terminé
+    message: Programme 40°, 1 h 12
+```
+
+## Actions et conditions d'appareil
+
+Dans l'éditeur d'automatisations, « Appareil » › un écran Linkivi propose, en plus des déclencheurs :
+
+- **Actions** : afficher un message (en coin par défaut, avec l'image d'une caméra), effacer le message, changer de liste, éteindre ou rallumer l'écran, redémarrer le player, redémarrer l'appareil (si le matériel le permet), déclencher l'alerte d'urgence sur cet écran ;
+- **Conditions** : l'écran est en ligne, hors ligne, en veille, allumé, diffuse telle liste ; une alerte d'urgence est en cours.
+
 
 ## Exemples
 
@@ -221,7 +247,8 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
-| **1.7.2** | Bouton **Reconfigurer** : nouvelle autorisation par code sans supprimer l'intégration (par exemple pour obtenir l'urgence). |
+| **1.8.0** | Place **Coin** (carte posée sur la diffusion), image d'une caméra ou d'une adresse, image en direct, étiquette ; entités **Message** et **Tous les écrans** (`notify`) ; capteurs **Batterie** et **En charge** ; actions et conditions d'appareil. |
+| 1.7.2 | Bouton **Reconfigurer** : nouvelle autorisation par code sans supprimer l'intégration (par exemple pour obtenir l'urgence). |
 | 1.7.1 | Tout sur tous les plans (commandes, messages, aperçu, urgence sans l'application du Store). Carte 2.0.1. |
 | 1.7.0 | Carte « Écrans Linkivi » 2.0 : liste diffusée, aperçu du direct, fenêtre d'un écran, alerte d'urgence. |
 | 1.6.0 | Partage des appareils de la maison avec les écrans de Linkivi, sans jeton ni relais. |
@@ -230,4 +257,4 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 ## Pas encore essayé
 
-Les entités ont été vues sur une vraie instance (six écrans). Le code Python n'est pas exécuté sur le poste de développement (pas de Python) : **les boutons, l'interrupteur, les actions, le bouton Reconfigurer et la carte n'ont pas encore tous été essayés dans un vrai Home Assistant**. Le serveur de Linkivi est couvert par des tests (`HaPairingTests`, `ScreenCommandsApiTests`) ; la carte a été essayée dans un faux Home Assistant.
+Les entités ont été vues sur une vraie instance (six écrans). Le code Python n'est pas exécuté sur le poste de développement (pas de Python) : **les boutons, l'interrupteur, les actions, le bouton Reconfigurer, la carte et les nouveautés de la 1.8.0 (coin, image, notifications, batterie, actions et conditions d'appareil) n'ont pas encore tous été essayés dans un vrai Home Assistant**. Le serveur de Linkivi est couvert par des tests (`HaPairingTests`, `ScreenCommandsApiTests`) ; la carte a été essayée dans un faux Home Assistant.

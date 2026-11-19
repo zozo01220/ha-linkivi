@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 from typing import Any
 
 import aiohttp
@@ -139,17 +140,37 @@ class LinkivApi:
         title: str | None,
         message: str | None,
         look: str,
-        duration: int,
+        duration: int | None,
         wake: bool,
         place: str = "full",
+        corner: str | None = None,
+        tag: str | None = None,
+        image: bytes | None = None,
+        live: bool = False,
     ) -> dict[str, Any]:
-        """Affiche un message un moment par-dessus la diffusion (accès screens:control) ; Linkivi dit pourquoi il refuse (écran hors ligne, en veille…)."""
-        body: dict[str, Any] = {"look": look, "durationSeconds": duration, "wake": wake, "place": place}
+        """Affiche un message un moment (accès screens:control) ; Linkivi dit pourquoi il refuse (écran hors ligne, en veille…).
+
+        duration None : la durée par défaut de Linkivi (30 s, 15 s en coin). Réponse : « noticeId », pour rafraîchir l'image (display_image).
+        """
+        body: dict[str, Any] = {"look": look, "wake": wake, "place": place}
+        if duration:
+            body["durationSeconds"] = duration
+        if corner:
+            body["corner"] = corner
+        if tag:
+            body["tag"] = tag
+        if image:
+            body["image"] = base64.b64encode(image).decode("ascii")
+            body["live"] = live
         if title:
             body["title"] = title
         if message:
             body["message"] = message
         return await self._request("POST", f"/screens/{screen_id}/display", json=body)
+
+    async def display_image(self, screen_id: str, notice_id: str, image: bytes) -> dict[str, Any]:
+        """Nouvelle image d'un message encore affiché (image « En direct » d'une caméra, §309)."""
+        return await self._request("PUT", f"/screens/{screen_id}/display/image", json={"noticeId": notice_id, "image": base64.b64encode(image).decode("ascii")})
 
     async def clear_display(self, screen_id: str) -> dict[str, Any]:
         """Retire le message affiché : la diffusion reprend."""

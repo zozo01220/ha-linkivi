@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 # Rien à configurer en YAML : tout passe par l'interface (contrôle hassfest)
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.CAMERA, Platform.SELECT, Platform.SENSOR, Platform.SWITCH]
+PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.CAMERA, Platform.NOTIFY, Platform.SELECT, Platform.SENSOR, Platform.SWITCH]
 
 
 class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):

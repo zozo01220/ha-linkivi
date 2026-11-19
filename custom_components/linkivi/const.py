@@ -7,7 +7,7 @@ DOMAIN = "linkivi"
 # Carte personnalisée « Écrans Linkivi » (www/linkivi-screens-card.js), publiée sous /linkivi/ et chargée par l'interface.
 CARD_FILE = "linkivi-screens-card.js"
 CARD_URL = f"/{DOMAIN}/{CARD_FILE}"
-CARD_VERSION = "2.0.0"
+CARD_VERSION = "2.0.1"
 
 # L'API publique de Linkivi (§154). L'état arrive en direct par le canal temps réel (§299) ;
 # la relecture complète n'est plus qu'un filet de sécurité (toutes les 5 min).
@@ -52,3 +52,9 @@ SERVICE_SHOW_LIST = "show_list"
 SERVICE_START_EMERGENCY = "start_emergency"
 SERVICE_END_EMERGENCY = "end_emergency"
 LOOKS = ["information", "attention"]
+# Places d'un message (§309) : plein écran, bandeau, ou carte dans un coin (la diffusion continue) ; coins possibles.
+PLACES = ["full", "banner", "corner"]
+CORNERS = ["bottom_right", "bottom_left", "top_right", "top_left"]
+# Image « En direct » d'une caméra : nouvelle image toutes les 2 s pendant l'affichage.
+LIVE_IMAGE_SECONDS = 2
+MAX_IMAGE_BYTES = 3_000_000

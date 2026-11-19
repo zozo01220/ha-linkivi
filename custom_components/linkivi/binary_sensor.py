@@ -19,7 +19,7 @@ from .entity import LinkivEntity, add_new_screens
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator = entry.runtime_data
     entry.async_on_unload(
-        add_new_screens(coordinator, async_add_entities, lambda sid, _s: [LinkivOnlineSensor(coordinator, sid)])
+        add_new_screens(coordinator, async_add_entities, lambda sid, s: [LinkivOnlineSensor(coordinator, sid)] + ([LinkivChargingSensor(coordinator, sid)] if s.get("battery") else []))
     )
     if "emergency:read" in coordinator.scopes:
         async_add_entities([LinkivEmergencySensor(coordinator)])
@@ -51,6 +51,20 @@ class LinkivOnlineSensor(LinkivEntity, BinarySensorEntity):
             "playlist": (s.get("playlist") or {}).get("name"),
             "resolution": s.get("resolution"),
         }
+
+
+class LinkivChargingSensor(LinkivEntity, BinarySensorEntity):
+    """En charge : l'appareil Android est branché (§309)."""
+
+    _attr_device_class = BinarySensorDeviceClass.BATTERY_CHARGING
+
+    def __init__(self, coordinator, screen_id: str) -> None:
+        super().__init__(coordinator, screen_id, "charging")
+
+    @property
+    def is_on(self) -> bool | None:
+        b = self.screen.get("battery")
+        return bool(b.get("charging")) if b else None
 
 
 class LinkivEmergencySensor(CoordinatorEntity, BinarySensorEntity):

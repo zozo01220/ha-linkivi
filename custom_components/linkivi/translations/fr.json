@@ -64,6 +64,37 @@
       "online": "{entity_name} est de retour",
       "applied": "{entity_name} affiche une nouvelle version",
       "emergency": "{entity_name} affiche l'alerte d'urgence"
+    },
+    "action_type": {
+      "show_message": "Afficher un message sur {entity_name}",
+      "clear_display": "Effacer le message de {entity_name}",
+      "show_list": "Changer la liste de {entity_name}",
+      "screen_off": "Éteindre l'écran {entity_name}",
+      "wake": "Rallumer l'écran {entity_name}",
+      "restart_player": "Redémarrer le player de {entity_name}",
+      "reboot": "Redémarrer l'appareil {entity_name}",
+      "start_emergency": "Déclencher l'alerte d'urgence sur {entity_name}"
+    },
+    "condition_type": {
+      "is_online": "{entity_name} est en ligne",
+      "is_offline": "{entity_name} est hors ligne",
+      "is_asleep": "{entity_name} est en veille",
+      "is_awake": "{entity_name} est allumé",
+      "shows_playlist": "{entity_name} diffuse une liste",
+      "shows_emergency": "Une alerte d'urgence est en cours"
+    },
+    "extra_fields": {
+      "title": "Titre",
+      "message": "Message",
+      "place": "Place",
+      "corner": "Coin",
+      "look": "Aspect",
+      "duration": "Durée",
+      "camera": "Caméra",
+      "wake": "Réveiller l'écran",
+      "playlist": "Liste",
+      "emergency_title": "Titre de l'alerte",
+      "emergency_message": "Message de l'alerte"
     }
   },
   "entity": {
@@ -115,6 +146,14 @@
       "preview": {
         "name": "Aperçu du direct"
       }
+    },
+    "notify": {
+      "screen": {
+        "name": "Message"
+      },
+      "all_screens": {
+        "name": "Tous les écrans"
+      }
     }
   },
   "services": {
@@ -136,7 +175,7 @@
         },
         "duration": {
           "name": "Durée",
-          "description": "En secondes, de 5 à 3600."
+          "description": "En secondes, de 5 à 3600. Vide : 30 s, 15 s en coin."
         },
         "wake": {
           "name": "Réveiller l'écran",
@@ -144,7 +183,27 @@
         },
         "place": {
           "name": "Emplacement",
-          "description": "Plein écran, ou dans la case du bandeau qui reçoit les messages (plein écran si l'écran n'en a pas)."
+          "description": "Plein écran, la case du bandeau qui reçoit les messages (plein écran si l'écran n'en a pas), ou une carte dans un coin : la diffusion continue derrière."
+        },
+        "corner": {
+          "name": "Coin",
+          "description": "Coin de la carte (place Coin). Sur un mur d'écrans, seul l'écran de ce coin l'affiche."
+        },
+        "camera": {
+          "name": "Caméra",
+          "description": "Image d'une caméra de Home Assistant, lue ici et envoyée à Linkivi : l'écran ne contacte jamais la caméra."
+        },
+        "image_url": {
+          "name": "Adresse d'image",
+          "description": "Image lue par Home Assistant à cette adresse (JPEG, PNG ou WebP, 3 Mo au plus). Ignorée si une caméra est choisie."
+        },
+        "live": {
+          "name": "Image en direct",
+          "description": "L'image de la caméra est rafraîchie toutes les 2 secondes pendant l'affichage (mention « En direct »)."
+        },
+        "tag": {
+          "name": "Étiquette",
+          "description": "Une nouvelle carte de même étiquette remplace l'ancienne au lieu de s'empiler (ex. sonnette)."
         }
       }
     },
@@ -191,7 +250,16 @@
     "place": {
       "options": {
         "full": "Plein écran",
-        "banner": "Bandeau"
+        "banner": "Bandeau",
+        "corner": "Coin"
+      }
+    },
+    "corner": {
+      "options": {
+        "bottom_right": "Bas droite",
+        "bottom_left": "Bas gauche",
+        "top_right": "Haut droite",
+        "top_left": "Haut gauche"
       }
     }
   },

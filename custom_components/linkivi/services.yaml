@@ -21,7 +21,7 @@ show_message:
             - information
             - attention
     duration:
-      default: 30
+      example: 30
       selector:
         number:
           min: 5
@@ -40,6 +40,34 @@ show_message:
           options:
             - full
             - banner
+            - corner
+    corner:
+      default: bottom_right
+      selector:
+        select:
+          translation_key: corner
+          options:
+            - bottom_right
+            - bottom_left
+            - top_right
+            - top_left
+    camera:
+      selector:
+        entity:
+          domain: camera
+    image_url:
+      example: "https://example.com/image.jpg"
+      selector:
+        text:
+          type: url
+    live:
+      default: false
+      selector:
+        boolean:
+    tag:
+      example: "doorbell"
+      selector:
+        text:
 
 clear_display:
   target:

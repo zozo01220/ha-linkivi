@@ -14,9 +14,12 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 from .api import LinkivError
+from .message import read_image, show
 from .const import (
     DOMAIN,
+    CORNERS,
     LOOKS,
+    PLACES,
     SERVICE_CLEAR_DISPLAY,
     SERVICE_END_EMERGENCY,
     SERVICE_SHOW_LIST,
@@ -34,9 +37,14 @@ SHOW_MESSAGE_SCHEMA = vol.All(
             vol.Optional("title"): vol.All(cv.string, vol.Length(max=60)),
             vol.Optional("message"): vol.All(cv.string, vol.Length(max=300)),
             vol.Optional("look", default=LOOKS[0]): vol.In(LOOKS),
-            vol.Optional("duration", default=30): vol.All(vol.Coerce(int), vol.Range(min=5, max=3600)),
+            vol.Optional("duration"): vol.All(vol.Coerce(int), vol.Range(min=5, max=3600)),   # sans durée : 30 s, 15 s en coin (Linkivi)
             vol.Optional("wake", default=False): cv.boolean,
-            vol.Optional("place", default="full"): vol.In(("full", "banner")),
+            vol.Optional("place", default="full"): vol.In(PLACES),
+            vol.Optional("corner", default=CORNERS[0]): vol.In(CORNERS),
+            vol.Optional("camera"): cv.entity_id,
+            vol.Optional("image_url"): cv.url,
+            vol.Optional("live", default=False): cv.boolean,
+            vol.Optional("tag"): vol.All(cv.string, vol.Length(max=40)),
         },
         extra=vol.ALLOW_EXTRA,
     ),
@@ -123,18 +131,11 @@ async def async_register_services(hass: HomeAssistant) -> None:
     """Déclare les actions ; appelé une fois, au chargement de l'intégration."""
 
     async def show_message(call: ServiceCall) -> None:
-        data = call.data
+        data = dict(call.data)
+        image = await read_image(hass, data.get("camera"), data.get("image_url"))   # lue une fois, envoyée à chaque écran
 
         async def send(api, screen_id: str) -> None:
-            await api.display(
-                screen_id,
-                title=data.get("title"),
-                message=data.get("message"),
-                look=data["look"],
-                duration=data["duration"],
-                wake=data["wake"],
-                place=data["place"],
-            )
+            await show(hass, api, screen_id, data, image)
 
         await _run(call, send)
 

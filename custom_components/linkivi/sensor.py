@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.const import PERCENTAGE
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -18,7 +19,7 @@ STATES = ["online", "offline", "updating", "asleep", "paused"]
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator = entry.runtime_data
     entry.async_on_unload(
-        add_new_screens(coordinator, async_add_entities, lambda sid, _s: [LinkivStateSensor(coordinator, sid), LinkivLastSeenSensor(coordinator, sid)])
+        add_new_screens(coordinator, async_add_entities, lambda sid, s: [LinkivStateSensor(coordinator, sid), LinkivLastSeenSensor(coordinator, sid)] + ([LinkivBatterySensor(coordinator, sid)] if s.get("battery") else []))
     )
 
 
@@ -60,3 +61,19 @@ class LinkivLastSeenSensor(LinkivEntity, SensorEntity):
     def native_value(self) -> datetime | None:
         raw = self.screen.get("lastSeenAt")
         return dt_util.parse_datetime(raw) if raw else None
+
+
+class LinkivBatterySensor(LinkivEntity, SensorEntity):
+    """Batterie d'un smartphone ou d'une tablette Android (§309) : dernier niveau connu. Pour la recharger entre 20 et 80 % par une prise connectée."""
+
+    _attr_device_class = SensorDeviceClass.BATTERY
+    _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, coordinator, screen_id: str) -> None:
+        super().__init__(coordinator, screen_id, "battery")
+
+    @property
+    def native_value(self) -> int | None:
+        b = self.screen.get("battery")
+        return b.get("level") if b else None

@@ -64,6 +64,37 @@
       "online": "{entity_name} is back online",
       "applied": "{entity_name} shows a new version",
       "emergency": "{entity_name} shows the emergency alert"
+    },
+    "action_type": {
+      "show_message": "Show a message on {entity_name}",
+      "clear_display": "Clear the message on {entity_name}",
+      "show_list": "Change the playlist of {entity_name}",
+      "screen_off": "Turn off the screen {entity_name}",
+      "wake": "Wake the screen {entity_name}",
+      "restart_player": "Restart the player of {entity_name}",
+      "reboot": "Restart the device {entity_name}",
+      "start_emergency": "Start the emergency alert on {entity_name}"
+    },
+    "condition_type": {
+      "is_online": "{entity_name} is online",
+      "is_offline": "{entity_name} is offline",
+      "is_asleep": "{entity_name} is asleep",
+      "is_awake": "{entity_name} is awake",
+      "shows_playlist": "{entity_name} shows a playlist",
+      "shows_emergency": "An emergency alert is in progress"
+    },
+    "extra_fields": {
+      "title": "Title",
+      "message": "Message",
+      "place": "Place",
+      "corner": "Corner",
+      "look": "Look",
+      "duration": "Duration",
+      "camera": "Camera",
+      "wake": "Wake the screen",
+      "playlist": "Playlist",
+      "emergency_title": "Alert title",
+      "emergency_message": "Alert message"
     }
   },
   "entity": {
@@ -115,6 +146,14 @@
       "preview": {
         "name": "Live preview"
       }
+    },
+    "notify": {
+      "screen": {
+        "name": "Message"
+      },
+      "all_screens": {
+        "name": "All screens"
+      }
     }
   },
   "services": {
@@ -136,7 +175,7 @@
         },
         "duration": {
           "name": "Duration",
-          "description": "In seconds, from 5 to 3600."
+          "description": "In seconds, from 5 to 3600. Empty: 30 s, 15 s in a corner."
         },
         "wake": {
           "name": "Wake the screen",
@@ -144,7 +183,27 @@
         },
         "place": {
           "name": "Place",
-          "description": "Full screen, or the banner cell that receives messages (full screen if the screen has none)."
+          "description": "Full screen, the banner cell that receives messages (full screen if the screen has none), or a card in a corner: the playlist keeps playing behind it."
+        },
+        "corner": {
+          "name": "Corner",
+          "description": "Corner of the card (place Corner). On a video wall, only the screen in that corner shows it."
+        },
+        "camera": {
+          "name": "Camera",
+          "description": "Picture of a Home Assistant camera, read here and sent to Linkivi: the screen never reaches the camera."
+        },
+        "image_url": {
+          "name": "Picture address",
+          "description": "Picture read by Home Assistant at this address (JPEG, PNG or WebP, 3 MB max). Ignored if a camera is chosen."
+        },
+        "live": {
+          "name": "Live picture",
+          "description": "The camera picture is refreshed every 2 seconds while the message is shown (\"Live\" label)."
+        },
+        "tag": {
+          "name": "Tag",
+          "description": "A new corner card with the same tag replaces the old one instead of stacking (e.g. doorbell)."
         }
       }
     },
@@ -191,7 +250,16 @@
     "place": {
       "options": {
         "full": "Full screen",
-        "banner": "Banner"
+        "banner": "Banner",
+        "corner": "Corner"
+      }
+    },
+    "corner": {
+      "options": {
+        "bottom_right": "Bottom right",
+        "bottom_left": "Bottom left",
+        "top_right": "Top right",
+        "top_left": "Top left"
       }
     }
   },
