@@ -151,6 +151,19 @@ class LinkivShare:
 
             img = await async_get_image(self.hass, eid)
             return 200, img.content, img.content_type, True
+        if method == "GET" and p.startswith("/api/media_player_proxy/"):
+            # pochette d'un lecteur partagé (application « En cours de lecture », 1.9.0) : celle que Home Assistant sert à son propre tableau de bord
+            eid = unquote(p[len("/api/media_player_proxy/"):])
+            if eid not in self.entities or not eid.startswith("media_player."):
+                return 404, b"", None, True
+            component = self.hass.data.get("media_player")
+            entity = component.get_entity(eid) if component is not None else None
+            if entity is None:
+                return 404, b"", None, True
+            data, ctype = await entity.async_get_media_image()
+            if not data:
+                return 404, b"", None, True
+            return 200, data, ctype or "image/jpeg", True
         if method == "GET" and p.startswith("/api/history/period/"):
             return await self._history(p, parts.query)
         if method == "POST" and p == "/api/template":

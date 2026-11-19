@@ -1,6 +1,6 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.8.1-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.9.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
 Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Huit blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
@@ -83,6 +83,10 @@ Dans l'éditeur d'automatisations (Ajouter une action › Linkivi) ou dans Outil
 Dans Linkivi, Applications › Home Assistant › « Par l'intégration Linkivi » (conseillé). Puis, dans Home Assistant : Paramètres › Appareils et services › Linkivi › **Configurer** › « Partager avec Linkivi » : des pièces, des libellés ou des entités, et « Permettre aux écrans de commander ces appareils » (non par défaut). Les serrures et les alarmes ne se partagent qu'une à une. Linkivi ne garde alors **aucun jeton** de votre Home Assistant et n'a plus besoin du relais : il demande les états, l'historique et les images des caméras à l'intégration, qui ne répond que pour ce qui est partagé.
 
 Déjà relié en direct ou par le relais ? Le bandeau « Passer par l'intégration » de Applications › Home Assistant fait la bascule dès que toutes les entités utilisées par vos écrans sont partagées ; l'ancien jeton est alors oublié.
+
+### La musique en cours sur les écrans
+
+Partagez un lecteur multimédia (enceinte, Spotify, Music Assistant, groupe Sonos…) comme n'importe quelle entité, par sa pièce, un libellé ou un à un. Dans Linkivi, ajoutez à une liste de lecture le contenu **« En cours de lecture »** et choisissez ce lecteur : pendant la lecture, l'écran montre la pochette, le titre, l'artiste et la progression, puis la liste reprend à l'arrêt. Trois façons de l'afficher : prendre tout l'écran, seulement à son tour dans la liste, ou en carte dans un coin. La pochette passe par l'intégration (1.9.0 ou plus) quand Home Assistant la sert lui-même.
 
 ## Temps réel et déclencheurs
 
@@ -249,7 +253,8 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
-| **1.8.1** | Réparation **« Redémarrage nécessaire »** après une mise à jour, avec un bouton qui redémarre Home Assistant. Huit **blueprints** et leurs automatisations équivalentes ([AUTOMATISATIONS.md](AUTOMATISATIONS.md)). |
+| **1.9.0** | Pochette d'un **lecteur multimédia** partagé, pour l'application **« En cours de lecture »** de Linkivi. |
+| 1.8.1 | Réparation **« Redémarrage nécessaire »** après une mise à jour, avec un bouton qui redémarre Home Assistant. Huit **blueprints** et leurs automatisations équivalentes ([AUTOMATISATIONS.md](AUTOMATISATIONS.md)). |
 | 1.8.0 | Place **Coin** (carte posée sur la diffusion), image d'une caméra ou d'une adresse, image en direct, étiquette ; entités **Message** et **Tous les écrans** (`notify`) ; capteurs **Batterie** et **En charge** ; actions et conditions d'appareil. |
 | 1.7.2 | Bouton **Reconfigurer** : nouvelle autorisation par code sans supprimer l'intégration (par exemple pour obtenir l'urgence). |
 | 1.7.1 | Tout sur tous les plans (commandes, messages, aperçu, urgence sans l'application du Store). Carte 2.0.1. |
