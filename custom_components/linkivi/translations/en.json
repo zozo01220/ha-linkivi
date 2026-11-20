@@ -89,6 +89,7 @@
       "place": "Place",
       "corner": "Corner",
       "look": "Look",
+      "blur": "Blurred background",
       "duration": "Duration",
       "camera": "Camera",
       "wake": "Wake the screen",
@@ -172,6 +173,10 @@
         "look": {
           "name": "Look",
           "description": "Information (light) or Attention (amber)."
+        },
+        "blur": {
+          "name": "Blurred background",
+          "description": "Full screen only: the message or camera shows as a centered card, with the playing content still visible behind it, blurred."
         },
         "duration": {
           "name": "Duration",

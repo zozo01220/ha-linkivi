@@ -1,6 +1,6 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.9.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.9.1-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
 Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Huit blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
@@ -156,7 +156,7 @@ Deux actions, dans l'éditeur d'automatisations (Ajouter une action › Linkivi)
 | `linkivi.show_message` | Affiche un message par-dessus la diffusion des écrans choisis, puis la diffusion reprend avec le contenu suivant. |
 | `linkivi.clear_display` | Retire le message tout de suite. |
 
-Champs de `show_message` : `title` (60 caractères) ou `message` (300) au moins un des deux ; `look` : `information` (clair, par défaut) ou `attention` (ambre) ; `place` : `full` (plein écran, par défaut), `banner` (bandeau) ou `corner` (carte dans un coin, la diffusion continue) ; `corner` : `bottom_right` (défaut), `bottom_left`, `top_right` ou `top_left` ; `duration` en secondes, de 5 à 3600 (vide : 30 s, 15 s en coin) ; `wake` : réveille un écran en veille pour la durée du message ; `camera` : l'image d'une caméra de Home Assistant, ou `image_url` : une image à une adresse (lue par Home Assistant, 3 Mo au plus) ; `live` : l'image de la caméra est rafraîchie toutes les 2 s (mention « En direct ») ; `tag` : une carte de même étiquette remplace l'ancienne. Les écrans se choisissent comme n'importe quel appareil : un écran, une pièce (aire Home Assistant) ou plusieurs.
+Champs de `show_message` : `title` (60 caractères) ou `message` (300) au moins un des deux ; `look` : `information` (clair, par défaut) ou `attention` (ambre) ; `blur` : en plein écran, le message ou la caméra s'affiche en carte au centre et la diffusion reste visible derrière, floutée ; `place` : `full` (plein écran, par défaut), `banner` (bandeau) ou `corner` (carte dans un coin, la diffusion continue) ; `corner` : `bottom_right` (défaut), `bottom_left`, `top_right` ou `top_left` ; `duration` en secondes, de 5 à 3600 (vide : 30 s, 15 s en coin) ; `wake` : réveille un écran en veille pour la durée du message ; `camera` : l'image d'une caméra de Home Assistant, ou `image_url` : une image à une adresse (lue par Home Assistant, 3 Mo au plus) ; `live` : l'image de la caméra est rafraîchie toutes les 2 s (mention « En direct ») ; `tag` : une carte de même étiquette remplace l'ancienne. Les écrans se choisissent comme n'importe quel appareil : un écran, une pièce (aire Home Assistant) ou plusieurs.
 
 Règles : l'écran doit être **en ligne** (un message de sonnette qui arrive trop tard ne sert à rien) et **éveillé**, sauf avec `wake: true` ; en plein écran, un nouveau message remplace le précédent ; en coin, deux cartes au plus s'empilent (la plus ancienne réduite à son titre) ; sur un mur d'écrans, seul l'écran du coin choisi montre la carte ; une alerte d'urgence passe devant. L'écran ne contacte jamais la caméra : Home Assistant lit l'image et l'envoie à Linkivi. Si Linkivi refuse, Home Assistant affiche la raison de chaque écran.
 
@@ -240,7 +240,7 @@ L'intégration n'appelle que l'API publique de Linkivi (voir `/docs/api` sur vot
 | `GET /api/v1/stream/next` | `screens:read` | Le même canal en attente longue, si le WebSocket ne passe pas. |
 | `GET /api/v1/screens` | `screens:read` | Relecture complète toutes les 5 min, par sécurité. Chaque écran liste dans `commands` ce que son matériel sait faire. |
 | `POST /api/v1/screens/{id}/commands` | `screens:control` | `{"command": "restart-player" \| "reboot" \| "poweroff" \| "screen-off" \| "wake"}`, réponse `202`. |
-| `POST /api/v1/screens/{id}/display` | `screens:control` | `{"title", "message", "look", "durationSeconds", "wake"}`, réponse `202`. |
+| `POST /api/v1/screens/{id}/display` | `screens:control` | `{"title", "message", "look", "blur", "durationSeconds", "wake", "place", "corner", "tag", "image", "live"}`, réponse `202`. |
 | `DELETE /api/v1/screens/{id}/display` | `screens:control` | Retire le message. |
 | `GET /api/v1/playlists`, `PUT /api/v1/screens/{id}/playlist` | `screens:read`, `screens:playlist` | Listes de l'organisation, et changement de la liste diffusée. |
 | `POST /api/v1/screens/{id}/capture` | `screens:control` | Aperçu du direct (image de l'écran). |
@@ -253,7 +253,8 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
-| **1.9.0** | Pochette d'un **lecteur multimédia** partagé, pour l'application **« En cours de lecture »** de Linkivi. |
+| **1.9.1** | Option **« Fond flouté »** de « Afficher un message » : en plein écran, la caméra ou le message en carte au centre, la diffusion floutée derrière. |
+| 1.9.0 | Pochette d'un **lecteur multimédia** partagé, pour l'application **« En cours de lecture »** de Linkivi. |
 | 1.8.1 | Réparation **« Redémarrage nécessaire »** après une mise à jour, avec un bouton qui redémarre Home Assistant. Huit **blueprints** et leurs automatisations équivalentes ([AUTOMATISATIONS.md](AUTOMATISATIONS.md)). |
 | 1.8.0 | Place **Coin** (carte posée sur la diffusion), image d'une caméra ou d'une adresse, image en direct, étiquette ; entités **Message** et **Tous les écrans** (`notify`) ; capteurs **Batterie** et **En charge** ; actions et conditions d'appareil. |
 | 1.7.2 | Bouton **Reconfigurer** : nouvelle autorisation par code sans supprimer l'intégration (par exemple pour obtenir l'urgence). |

@@ -37,6 +37,7 @@ SHOW_MESSAGE_SCHEMA = vol.All(
             vol.Optional("title"): vol.All(cv.string, vol.Length(max=60)),
             vol.Optional("message"): vol.All(cv.string, vol.Length(max=300)),
             vol.Optional("look", default=LOOKS[0]): vol.In(LOOKS),
+            vol.Optional("blur", default=False): cv.boolean,   # plein écran sur fond flouté : la diffusion reste visible derrière (§316)
             vol.Optional("duration"): vol.All(vol.Coerce(int), vol.Range(min=5, max=3600)),   # sans durée : 30 s, 15 s en coin (Linkivi)
             vol.Optional("wake", default=False): cv.boolean,
             vol.Optional("place", default="full"): vol.In(PLACES),

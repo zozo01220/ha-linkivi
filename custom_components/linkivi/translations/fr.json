@@ -89,6 +89,7 @@
       "place": "Place",
       "corner": "Coin",
       "look": "Aspect",
+      "blur": "Fond flouté",
       "duration": "Durée",
       "camera": "Caméra",
       "wake": "Réveiller l'écran",
@@ -172,6 +173,10 @@
         "look": {
           "name": "Aspect",
           "description": "Information (clair) ou Attention (ambre)."
+        },
+        "blur": {
+          "name": "Fond flouté",
+          "description": "Plein écran seulement : le message ou la caméra s'affiche en carte au centre, la diffusion reste visible derrière, floutée."
         },
         "duration": {
           "name": "Durée",

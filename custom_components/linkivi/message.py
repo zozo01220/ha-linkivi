@@ -73,6 +73,7 @@ async def show(
         title=data.get("title"),
         message=data.get("message"),
         look=data.get("look") or "information",
+        blur=bool(data.get("blur")) and place == "full",
         duration=data.get("duration"),
         wake=bool(data.get("wake")),
         place=place,

@@ -34,6 +34,7 @@ MESSAGE_FIELDS = {
     vol.Optional("place", default="corner"): vol.In(PLACES),
     vol.Optional("corner", default=CORNERS[0]): vol.In(CORNERS),
     vol.Optional("look", default=LOOKS[0]): vol.In(LOOKS),
+    vol.Optional("blur", default=False): cv.boolean,
     vol.Optional("duration"): vol.All(vol.Coerce(int), vol.Range(min=5, max=3600)),
     vol.Optional("camera"): cv.entity_id,
     vol.Optional("wake", default=False): cv.boolean,
@@ -89,6 +90,7 @@ async def async_get_action_capabilities(hass: HomeAssistant, config: ConfigType)
                     vol.Optional("place", default="corner"): selector.SelectSelector(selector.SelectSelectorConfig(options=PLACES, translation_key="place")),
                     vol.Optional("corner", default=CORNERS[0]): selector.SelectSelector(selector.SelectSelectorConfig(options=CORNERS, translation_key="corner")),
                     vol.Optional("look", default=LOOKS[0]): selector.SelectSelector(selector.SelectSelectorConfig(options=LOOKS, translation_key="look")),
+                    vol.Optional("blur", default=False): selector.BooleanSelector(),
                     vol.Optional("duration"): selector.NumberSelector(selector.NumberSelectorConfig(min=5, max=3600, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX)),
                     vol.Optional("camera"): selector.EntitySelector(selector.EntitySelectorConfig(domain="camera")),
                     vol.Optional("wake", default=False): selector.BooleanSelector(),
@@ -122,7 +124,7 @@ async def async_call_action_from_config(hass: HomeAssistant, config: ConfigType,
         if t == SHOW_MESSAGE:
             if not config.get("title") and not config.get("message"):
                 raise HomeAssistantError("Indiquez un titre ou un message.")
-            data = {k: config.get(k) for k in ("title", "message", "place", "corner", "look", "duration", "camera", "wake")}
+            data = {k: config.get(k) for k in ("title", "message", "place", "corner", "look", "blur", "duration", "camera", "wake")}
             await show(hass, api, sid, data, await read_image(hass, config.get("camera"), None))
         elif t == CLEAR:
             await api.clear_display(sid)

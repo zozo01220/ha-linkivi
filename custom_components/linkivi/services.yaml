@@ -20,6 +20,10 @@ show_message:
           options:
             - information
             - attention
+    blur:
+      default: false
+      selector:
+        boolean:
     duration:
       example: 30
       selector:

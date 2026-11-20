@@ -147,6 +147,7 @@ class LinkivApi:
         tag: str | None = None,
         image: bytes | None = None,
         live: bool = False,
+        blur: bool = False,
     ) -> dict[str, Any]:
         """Affiche un message un moment (accès screens:control) ; Linkivi dit pourquoi il refuse (écran hors ligne, en veille…).
 
@@ -155,6 +156,8 @@ class LinkivApi:
         body: dict[str, Any] = {"look": look, "wake": wake, "place": place}
         if duration:
             body["durationSeconds"] = duration
+        if blur:
+            body["blur"] = True   # plein écran sur fond flouté : la diffusion reste visible derrière (§316)
         if corner:
             body["corner"] = corner
         if tag:
