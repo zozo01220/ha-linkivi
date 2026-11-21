@@ -20,5 +20,5 @@
   "iot_class": "cloud_push",
   "issue_tracker": "https://github.com/zozo01220/ha-linkivi/issues",
   "requirements": [],
-  "version": "1.9.1"
+  "version": "1.10.0"
 }

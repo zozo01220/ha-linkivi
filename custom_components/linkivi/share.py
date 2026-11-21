@@ -42,6 +42,15 @@ def _dumps(obj: Any) -> str:
     return json.dumps(obj, cls=JSONEncoder, ensure_ascii=False)
 
 
+def _int(value: str | None) -> int | None:
+    """Taille d'image demandée (16 à 3840 px), ou None."""
+    try:
+        n = int(value) if value else 0
+    except ValueError:
+        return None
+    return n if 16 <= n <= 3840 else None
+
+
 class LinkivShare:
     """Le partage d'une entrée : quelles entités, commandes permises ou non, et les réponses aux demandes de Linkivi."""
 
@@ -81,7 +90,21 @@ class LinkivShare:
 
     def share_message(self) -> dict[str, Any]:
         self.compute()
-        return {"type": "ha.share", "name": self.hass.config.location_name or "Home Assistant", "entities": sorted(self.entities), "commands": self.commands}
+        return {
+            "type": "ha.share", "name": self.hass.config.location_name or "Home Assistant", "entities": sorted(self.entities), "commands": self.commands,
+            # adresses de Home Assistant (1.10.0) : les écrans de la maison y lisent eux-mêmes l'image des caméras partagées, sans passer par Linkivi
+            "internal": self._url(internal=True), "external": self._url(internal=False),
+        }
+
+    def _url(self, internal: bool) -> str:
+        from homeassistant.helpers.network import NoURLAvailableError, get_url   # noqa: PLC0415
+
+        try:
+            if internal:
+                return get_url(self.hass, allow_internal=True, allow_external=False, allow_cloud=False, allow_ip=True, prefer_external=False)
+            return get_url(self.hass, allow_internal=False, allow_external=True, allow_cloud=True, allow_ip=False, require_ssl=True, prefer_external=True)
+        except NoURLAvailableError:
+            return ""
 
     @callback
     def watch(self, send) -> None:
@@ -149,7 +172,11 @@ class LinkivShare:
                 return 404, b"", None, True
             from homeassistant.components.camera import async_get_image   # noqa: PLC0415 — seulement si une caméra est partagée
 
-            img = await async_get_image(self.hass, eid)
+            # taille affichée par l'écran (1.10.0) : Home Assistant réduit l'image (jamais au-delà de sa taille d'origine)
+            q = parse_qs(parts.query)
+            width = _int(q.get("width", [None])[0])
+            height = _int(q.get("height", [None])[0])
+            img = await async_get_image(self.hass, eid, width=width, height=height)
             return 200, img.content, img.content_type, True
         if method == "GET" and p.startswith("/api/media_player_proxy/"):
             # pochette d'un lecteur partagé (application « En cours de lecture », 1.9.0) : celle que Home Assistant sert à son propre tableau de bord
