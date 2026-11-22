@@ -14,6 +14,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -96,6 +97,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator.share.compute()
     coordinator.share.watch(coordinator.stream.send)
     entry.async_on_unload(coordinator.share.stop)
+
+    async def _started(_hass: HomeAssistant) -> None:
+        # Home Assistant a fini de démarrer : partage renvoyé avec toutes les entités qui ont maintenant un état (1.10.1)
+        if coordinator.stream and coordinator.share:
+            await coordinator.stream.send(coordinator.share.share_message())
+
+    entry.async_on_unload(async_at_started(hass, _started))
     entry.async_on_unload(entry.add_update_listener(_options_changed))
     entry.async_create_background_task(hass, coordinator.stream.run(), f"{DOMAIN}_stream_{entry.entry_id}")
     return True

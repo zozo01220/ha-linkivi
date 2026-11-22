@@ -20,6 +20,7 @@ from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.json import JSONEncoder
 from homeassistant.util import dt as dt_util
 
@@ -36,6 +37,9 @@ OPT_COMMANDS = "share_commands"
 
 # Serrures et alarmes : jamais par une pièce ou un libellé, seulement choisies une à une (décision 5 de la maquette)
 SENSITIVE = ("lock", "alarm_control_panel")
+
+# Entité apparue ou disparue : le partage est revu au bout de ce délai (s), une fois pour toutes celles arrivées entre-temps
+RESHARE_DELAY = 5
 
 
 def _dumps(obj: Any) -> str:
@@ -60,6 +64,9 @@ class LinkivShare:
         self.entities: set[str] = set()
         self._last_changed = 0.0
         self._unsub = None
+        # Entités partagées qui avaient un état au dernier partage envoyé : Linkivi ne connaît que celles-là (1.10.1)
+        self._announced: frozenset[str] = frozenset()
+        self._reshare_unsub = None
 
     @property
     def options(self) -> dict[str, Any]:
@@ -88,8 +95,13 @@ class LinkivShare:
         self.entities = {i for i in result if self.hass.states.get(i) is not None or i in chosen}
         return self.entities
 
+    def _stated(self) -> frozenset[str]:
+        """Entités partagées qui ont un état : Linkivi relit la liste par les états, les autres lui restent inconnues."""
+        return frozenset(i for i in self.entities if self.hass.states.get(i) is not None)
+
     def share_message(self) -> dict[str, Any]:
         self.compute()
+        self._announced = self._stated()
         return {
             "type": "ha.share", "name": self.hass.config.location_name or "Home Assistant", "entities": sorted(self.entities), "commands": self.commands,
             # adresses de Home Assistant (1.10.0) : les écrans de la maison y lisent eux-mêmes l'image des caméras partagées, sans passer par Linkivi
@@ -113,7 +125,20 @@ class LinkivShare:
             self._unsub()
 
         @callback
+        def _reshare(_now: Any) -> None:
+            """Une entité est apparue ou a disparu : le partage est renvoyé s'il a changé (Linkivi relit alors la liste)."""
+            self._reshare_unsub = None
+            before = self._announced
+            message = self.share_message()
+            if self._announced != before:
+                self.hass.async_create_task(send(message))
+
+        @callback
         def _changed(event: Event) -> None:
+            # Au démarrage de Home Assistant, les intégrations lentes (cloud, voitures…) publient leurs états après le premier partage :
+            # sans ce renvoi, Linkivi garderait une liste incomplète jusqu'à sa relecture du jour (1.10.1).
+            if (event.data.get("old_state") is None) != (event.data.get("new_state") is None) and self._reshare_unsub is None:
+                self._reshare_unsub = async_call_later(self.hass, RESHARE_DELAY, _reshare)
             if event.data.get("entity_id") not in self.entities:
                 return
             now = self.hass.loop.time()
@@ -125,6 +150,9 @@ class LinkivShare:
         self._unsub = self.hass.bus.async_listen(EVENT_STATE_CHANGED, _changed)
 
     def stop(self) -> None:
+        if self._reshare_unsub:
+            self._reshare_unsub()
+            self._reshare_unsub = None
         if self._unsub:
             self._unsub()
             self._unsub = None
