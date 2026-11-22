@@ -1,6 +1,6 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.10.1-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.11.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
 Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Huit blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
@@ -253,6 +253,7 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
+| **1.11.0** | **Map Home Assistant** : le partage annonce la position de la maison (celle de Home Assistant), pour l'icône maison de la carte des personnes. Partagez les personnes (`person.…`) à montrer. |
 | **1.10.1** | Après un **redémarrage de Home Assistant**, les entités des intégrations lentes à démarrer (voitures, cloud, caméras) ne sont plus « introuvables » dans Linkivi : le partage est renvoyé quand Home Assistant a fini de démarrer, puis dès qu'une entité partagée apparaît ou disparaît. |
 | **1.10.0** | Les **caméras** partagées sont lues par les écrans eux-mêmes, sur le réseau de la maison : l'intégration envoie à Linkivi les adresses interne et externe de Home Assistant, et l'image est réduite à la taille affichée. |
 | 1.9.1 | Option **« Fond flouté »** de « Afficher un message » : en plein écran, la caméra ou le message en carte au centre, la diffusion floutée derrière. |

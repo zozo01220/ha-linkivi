@@ -106,6 +106,8 @@ class LinkivShare:
             "type": "ha.share", "name": self.hass.config.location_name or "Home Assistant", "entities": sorted(self.entities), "commands": self.commands,
             # adresses de Home Assistant (1.10.0) : les écrans de la maison y lisent eux-mêmes l'image des caméras partagées, sans passer par Linkivi
             "internal": self._url(internal=True), "external": self._url(internal=False),
+            # position de la maison (1.11.0) : l'icône maison de l'application « Map Home Assistant »
+            "home": {"latitude": self.hass.config.latitude, "longitude": self.hass.config.longitude},
         }
 
     def _url(self, internal: bool) -> str:
