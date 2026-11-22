@@ -151,13 +151,13 @@ class LinkivStream:
         coordinator = self.coordinator
 
         if kind == "snapshot":
-            coordinator.async_set_updated_data({s["id"]: s for s in data.get("screens") or [] if "id" in s})
+            coordinator.publish({s["id"]: s for s in data.get("screens") or [] if "id" in s})
             return
         if kind == "screen.changed" and "id" in data:
-            coordinator.async_set_updated_data({**(coordinator.data or {}), data["id"]: data})
+            coordinator.publish({**coordinator.all_screens, data["id"]: data})
             return
         if kind == "screen.removed" and "id" in data:
-            coordinator.async_set_updated_data({k: v for k, v in (coordinator.data or {}).items() if k != data["id"]})
+            coordinator.publish({k: v for k, v in coordinator.all_screens.items() if k != data["id"]})
             return
 
         # urgences en cours (capteur « Urgence en cours »)

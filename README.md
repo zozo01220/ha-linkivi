@@ -1,6 +1,6 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.11.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.12.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
 Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Huit blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
@@ -14,7 +14,13 @@ Chaque écran devient un **appareil** Home Assistant. À ne pas confondre avec l
    **À la main** : copiez le dossier `custom_components/linkivi` dans `config/custom_components/` de Home Assistant, puis redémarrez Home Assistant.
 2. Paramètres › Appareils et services › Ajouter une intégration › **Linkivi** › **Se connecter avec un code** : adresse de votre Linkivi (par exemple `https://linkivi.duckdns.org`).
 3. Home Assistant affiche un **lien** et un **code** (8 lettres, `WDJB-MJHT`), valable 10 minutes. Ouvrez le lien : Linkivi s'ouvre (connectez-vous si besoin), vérifiez que le code est le même, choisissez l'organisation si vous en gérez plusieurs, puis **Autoriser**.
-4. Home Assistant reçoit sa clé tout seul : les écrans apparaissent en quelques secondes. Ceux ajoutés plus tard dans Linkivi apparaissent seuls, **en direct**.
+4. Home Assistant reçoit sa clé tout seul : les écrans apparaissent en quelques secondes.
+
+### Les écrans ajoutés plus tard
+
+Depuis la 1.12, un écran ajouté ensuite dans Linkivi apparaît **en direct** dans Paramètres › Appareils et services › **Découvertes** (« Linkivi · Accueil »). **Ajouter** demande la **pièce** où le ranger, puis en fait un appareil ; **Ignorer** le laisse de côté (il revient avec « Ne plus ignorer »). Un écran supprimé dans Linkivi avant d'être ajouté disparaît des Découvertes.
+
+Pour qu'ils apparaissent tout seuls, comme avant la 1.12 : Linkivi › **Configurer** › « Ajouter automatiquement les nouveaux écrans ». Les écrans déjà là lors du passage à la 1.12 restent tels quels. Supprimer l'appareil d'un écran (page de l'appareil › ⋮ › Supprimer) le renvoie dans les Découvertes.
 
 Qui peut autoriser : un administrateur de l'organisation, ou un membre qui publie **sans approbation**. Home Assistant agit ensuite au nom de cette personne, sans approbation. L'accès se retire dans Linkivi, Applications › Home Assistant › « Accès de Home Assistant » ; supprimer l'intégration dans Home Assistant le retire aussi.
 
@@ -253,6 +259,7 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
+| **1.12.0** | **Nouveaux écrans dans les Découvertes** : un écran ajouté dans Linkivi est proposé dans Paramètres › Appareils et services › Découvertes, avec le choix de sa pièce. Option « Ajouter automatiquement les nouveaux écrans » pour garder l'ajout tout seul. |
 | **1.11.0** | **Map Home Assistant** : le partage annonce la position de la maison (celle de Home Assistant), pour l'icône maison de la carte des personnes. Partagez les personnes (`person.…`) à montrer. |
 | **1.10.1** | Après un **redémarrage de Home Assistant**, les entités des intégrations lentes à démarrer (voitures, cloud, caméras) ne sont plus « introuvables » dans Linkivi : le partage est renvoyé quand Home Assistant a fini de démarrer, puis dès qu'une entité partagée apparaît ou disparaît. |
 | **1.10.0** | Les **caméras** partagées sont lues par les écrans eux-mêmes, sur le réseau de la maison : l'intégration envoie à Linkivi les adresses interne et externe de Home Assistant, et l'image est réduite à la taille affichée. |
@@ -269,4 +276,4 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 ## Pas encore essayé
 
-Les entités ont été vues sur une vraie instance (six écrans). Le code Python n'est pas exécuté sur le poste de développement (pas de Python) : **les boutons, l'interrupteur, les actions, le bouton Reconfigurer, la carte et les nouveautés de la 1.8.0 (coin, image, notifications, batterie, actions et conditions d'appareil) n'ont pas encore tous été essayés dans un vrai Home Assistant**. Le serveur de Linkivi est couvert par des tests (`HaPairingTests`, `ScreenCommandsApiTests`) ; la carte a été essayée dans un faux Home Assistant.
+Les entités ont été vues sur une vraie instance (six écrans). Le code Python n'est pas exécuté sur le poste de développement (pas de Python) : **les boutons, l'interrupteur, les actions, le bouton Reconfigurer, la carte et les nouveautés de la 1.8.0 (coin, image, notifications, batterie, actions et conditions d'appareil) n'ont pas encore tous été essayés dans un vrai Home Assistant**. Les Découvertes de la 1.12 (ajout avec la pièce, Ignorer, Ne plus ignorer, suppression d'un appareil) non plus. Le serveur de Linkivi est couvert par des tests (`HaPairingTests`, `ScreenCommandsApiTests`) ; la carte a été essayée dans un faux Home Assistant.

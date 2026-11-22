@@ -8,20 +8,20 @@ from typing import Any
 
 from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import SOURCE_INTEGRATION_DISCOVERY, ConfigEntry
 from homeassistant.const import CONF_API_KEY, CONF_URL, Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, device_registry as dr, discovery_flow
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import LinkivApi, LinkivAuthError, LinkivError
-from .const import CARD_FILE, CARD_URL, CARD_VERSION, DOMAIN, SCAN_INTERVAL
+from .const import CARD_FILE, CARD_URL, CARD_VERSION, CONF_SCREENS, CONF_SEEN, DEVICE_LABELS, DISCOVERY_PREFIX, DOMAIN, OPT_AUTO_ADD, SCAN_INTERVAL
 from .services import async_register_services
-from .share import LinkivShare
+from .share import OPT_AREAS, OPT_COMMANDS, OPT_ENTITIES, OPT_LABELS, LinkivShare
 from .stream import LinkivStream
 from .update_check import async_watch_updates
 
@@ -50,6 +50,97 @@ class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         # Partage avec Linkivi (§303) : entités montrées sur les écrans sans jeton chez Linkivi
         self.key_id: str = ""
         self.share: LinkivShare | None = None
+        # Écrans (§337) : tous ceux du compte ; « data » ne garde que ceux que Home Assistant suit (appareils)
+        self.all_screens: dict[str, dict[str, Any]] = {}
+        screens = entry.data.get(CONF_SCREENS)
+        self.tracked: set[str] | None = None if screens is None else set(screens)
+        self.seen: set[str] = set(entry.data.get(CONF_SEEN) or screens or [])
+        self._announced: set[str] = set()   # écrans proposés dans Découvertes depuis le démarrage
+        self.share_options = _share_options(entry)
+
+    @property
+    def auto_add(self) -> bool:
+        return bool(self.config_entry.options.get(OPT_AUTO_ADD, False))
+
+    @callback
+    def set_screens(self, screens: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        """Garde tous les écrans du compte, rend ceux que Home Assistant suit et propose les autres dans Découvertes.
+
+        Première fois (installation, ou passage à la 1.12) : tous les écrans déjà là sont suivis.
+        Ensuite, un écran jamais vu est suivi tout de suite si « Ajouter automatiquement » est coché ;
+        sinon, comme un écran retiré de Home Assistant, il attend dans Découvertes.
+        """
+        self.all_screens = screens
+        if self.tracked is None:
+            self._save(set(screens), set(screens))
+        else:
+            new = set(screens) - self.seen
+            if new:
+                self._save(self.tracked | new if self.auto_add else self.tracked, self.seen | new)
+        self._announce()
+        return {k: v for k, v in screens.items() if k in (self.tracked or set())}
+
+    @callback
+    def publish(self, screens: dict[str, dict[str, Any]]) -> None:
+        """Écrans reçus par le canal temps réel (ou options changées) : même tri que la relecture complète."""
+        self.async_set_updated_data(self.set_screens(screens))
+
+    @callback
+    def _save(self, tracked: set[str], seen: set[str]) -> None:
+        self.tracked, self.seen = tracked, seen
+        entry = self.config_entry
+        self.hass.config_entries.async_update_entry(entry, data={**entry.data, CONF_SCREENS: sorted(tracked), CONF_SEEN: sorted(seen)})
+
+    @callback
+    def _announce(self) -> None:
+        """Un écran non suivi → une découverte (une seule par démarrage ; « Ignorer » est géré par Home Assistant) ; écran supprimé → découverte retirée."""
+        waiting = set(self.all_screens) - (self.tracked or set())
+        for sid in waiting - self._announced:
+            screen = self.all_screens[sid]
+            discovery_flow.async_create_flow(
+                self.hass, DOMAIN, context={"source": SOURCE_INTEGRATION_DISCOVERY},
+                data={"entry_id": self.config_entry.entry_id, "screen_id": sid, "name": screen.get("name") or "Écran", "model": DEVICE_LABELS.get(screen.get("device"), "Écran")},
+            )
+        for sid in self._announced - waiting:
+            self.forget_discovery(sid)
+        self._announced = waiting
+
+    @callback
+    def forget_discovery(self, sid: str) -> None:
+        """Retire la découverte en attente d'un écran (supprimé dans Linkivi, ou ajouté par un autre chemin)."""
+        flows = self.hass.config_entries.flow
+        for flow in flows.async_progress_by_handler(DOMAIN, match_context={"unique_id": f"{DISCOVERY_PREFIX}{sid}"}):
+            flows.async_abort(flow["flow_id"])
+        self._announced.discard(sid)
+
+    @callback
+    def add_screen(self, sid: str, area_id: str | None = None) -> bool:
+        """« Ajouter » dans Découvertes : l'écran devient un appareil, rangé tout de suite dans la pièce choisie."""
+        screen = self.all_screens.get(sid)
+        if screen is None:
+            return False
+        device_reg = dr.async_get(self.hass)
+        device = device_reg.async_get_or_create(
+            config_entry_id=self.config_entry.entry_id,
+            identifiers={(DOMAIN, sid)},
+            name=screen.get("name") or "Écran",
+            manufacturer="Linkivi",
+            model=DEVICE_LABELS.get(screen.get("device"), "Écran"),
+            configuration_url=self.api.base_url,
+        )
+        if area_id:
+            device_reg.async_update_device(device.id, area_id=area_id)
+        self._announced.discard(sid)
+        self._save((self.tracked or set()) | {sid}, self.seen | {sid})
+        self.publish(self.all_screens)
+        return True
+
+    @callback
+    def remove_screen(self, sid: str) -> None:
+        """Appareil supprimé dans Home Assistant : l'écran n'est plus suivi et retourne dans Découvertes."""
+        if self.tracked and sid in self.tracked:
+            self._save(self.tracked - {sid}, self.seen | {sid})
+            self.publish(self.all_screens)
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         try:
@@ -61,7 +152,7 @@ class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             raise ConfigEntryAuthFailed(str(err)) from err
         except LinkivError as err:
             raise UpdateFailed(str(err)) from err
-        return {s["id"]: s for s in screens}
+        return self.set_screens({s["id"]: s for s in screens})
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -109,11 +200,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
+def _share_options(entry: ConfigEntry) -> dict[str, Any]:
+    return {k: entry.options.get(k) for k in (OPT_AREAS, OPT_LABELS, OPT_ENTITIES, OPT_COMMANDS)}
+
+
 async def _options_changed(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Partage modifié dans les options : Linkivi est prévenu tout de suite."""
+    """Entrée modifiée : « Ajouter automatiquement » pris en compte ; partage modifié → Linkivi prévenu tout de suite."""
     coordinator = entry.runtime_data
+    coordinator.publish(coordinator.all_screens)
+    share = _share_options(entry)
+    if share == coordinator.share_options:
+        return   # seule la liste des écrans suivis a changé
+    coordinator.share_options = share
     if coordinator.stream and coordinator.share:
         await coordinator.stream.send(coordinator.share.share_message())
+
+
+async def async_remove_config_entry_device(hass: HomeAssistant, entry: ConfigEntry, device: dr.DeviceEntry) -> bool:
+    """« Supprimer l'appareil » permis pour un écran (il retourne dans Découvertes), jamais pour l'organisation."""
+    coordinator = getattr(entry, "runtime_data", None)
+    ids = [ident for domain, ident in device.identifiers if domain == DOMAIN]
+    if coordinator is None or not ids or ids[0].startswith("org_"):
+        return False
+    coordinator.remove_screen(ids[0])
+    return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

@@ -58,3 +58,11 @@ CORNERS = ["bottom_right", "bottom_left", "top_right", "top_left"]
 # Image « En direct » d'une caméra : nouvelle image toutes les 2 s pendant l'affichage.
 LIVE_IMAGE_SECONDS = 2
 MAX_IMAGE_BYTES = 3_000_000
+
+# Écrans suivis (§337) : seuls ces écrans deviennent des appareils ; les autres sont proposés dans Paramètres › Appareils et services › Découvertes.
+# Rangés dans entry.data (le parcours d'options réécrit toutes les options) : écrans suivis, écrans déjà vus une fois.
+CONF_SCREENS = "screens"
+CONF_SEEN = "seen_screens"
+# Option : un écran jamais vu devient tout de suite un appareil, sans passer par Découvertes (comportement d'avant la 1.12).
+OPT_AUTO_ADD = "auto_add_screens"
+DISCOVERY_PREFIX = "screen_"

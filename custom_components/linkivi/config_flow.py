@@ -1,4 +1,7 @@
-"""Ajout de Linkivi (§299, lot 1) : avec un code à vérifier dans Linkivi (proposé), ou en collant une clé d'API (avancé)."""
+"""Ajout de Linkivi (§299, lot 1) : avec un code à vérifier dans Linkivi (proposé), ou en collant une clé d'API (avancé).
+
+Nouveaux écrans (§337) : proposés un par un dans Découvertes ; « Ajouter » en fait un appareil, rangé dans la pièce choisie.
+"""
 
 from __future__ import annotations
 
@@ -8,14 +11,15 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import SOURCE_REAUTH, SOURCE_RECONFIGURE, ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
+from homeassistant.config_entries import SOURCE_REAUTH, SOURCE_RECONFIGURE, ConfigEntry, ConfigEntryState, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_API_KEY, CONF_URL
 from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.typing import DiscoveryInfoType
 
 from .api import LinkivApi, LinkivAuthError, LinkivError, clean_url, pair_start, pair_token
-from .const import DEFAULT_URL, DOMAIN
+from .const import DEFAULT_URL, DISCOVERY_PREFIX, DOMAIN, OPT_AUTO_ADD
 from .share import OPT_AREAS, OPT_COMMANDS, OPT_ENTITIES, OPT_LABELS
 
 
@@ -33,6 +37,7 @@ class LinkivConfigFlow(ConfigFlow, domain=DOMAIN):
         self._task: asyncio.Task[dict[str, Any] | None] | None = None
         self._result: dict[str, Any] | None = None
         self._failure = "expired"
+        self._screen: dict[str, Any] = {}
 
     # ---------- départ : le menu ----------
 
@@ -173,9 +178,58 @@ class LinkivConfigFlow(ConfigFlow, domain=DOMAIN):
             errors["base"] = error or "unknown"
         return self.async_show_form(step_id="reauth_key", data_schema=vol.Schema({vol.Required(CONF_API_KEY): str}), errors=errors)
 
+    # ---------- un nouvel écran, proposé dans Découvertes (§337) ----------
+
+    async def async_step_integration_discovery(self, discovery_info: DiscoveryInfoType) -> ConfigFlowResult:
+        """Annoncé par l'intégration déjà configurée : un écran de Linkivi que Home Assistant ne suit pas encore."""
+        await self.async_set_unique_id(f"{DISCOVERY_PREFIX}{discovery_info['screen_id']}")
+        self._abort_if_unique_id_configured()   # écran ignoré
+        self._screen = dict(discovery_info)
+        return await self.async_step_discovery_confirm()
+
+    async def async_step_unignore(self, user_input: dict[str, Any]) -> ConfigFlowResult:
+        """« Ne plus ignorer » : l'écran est proposé de nouveau, s'il existe toujours dans Linkivi."""
+        unique_id = user_input["unique_id"]
+        sid = unique_id.removeprefix(DISCOVERY_PREFIX)
+        await self.async_set_unique_id(unique_id)
+        for entry in self.hass.config_entries.async_entries(DOMAIN):
+            coordinator = getattr(entry, "runtime_data", None)
+            if coordinator is not None and entry.state is ConfigEntryState.LOADED and sid in coordinator.all_screens:
+                screen = coordinator.all_screens[sid]
+                self._screen = {"entry_id": entry.entry_id, "screen_id": sid, "name": screen.get("name") or "Écran", "model": ""}
+                return await self.async_step_discovery_confirm()
+        return self.async_abort(reason="screen_gone")
+
+    def _hub(self) -> Any:
+        entry = self.hass.config_entries.async_get_entry(self._screen.get("entry_id", ""))
+        if entry is None or entry.state is not ConfigEntryState.LOADED:
+            return None
+        return entry
+
+    async def async_step_discovery_confirm(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        """Le nom de l'écran et la pièce où le ranger ; « Valider » l'ajoute à l'organisation Linkivi déjà connectée."""
+        name = self._screen.get("name") or "Écran"
+        self.context["title_placeholders"] = {"name": name}
+        hub = self._hub()
+        if hub is None:
+            return self.async_abort(reason="not_loaded")
+        if user_input is not None:
+            if not hub.runtime_data.add_screen(self._screen["screen_id"], user_input.get("area_id")):
+                return self.async_abort(reason="screen_gone")
+            return self.async_abort(reason="screen_added", description_placeholders={"name": name})
+        schema = vol.Schema({vol.Optional("area_id"): selector.AreaSelector()})
+        return self.async_show_form(
+            step_id="discovery_confirm",
+            data_schema=schema,
+            description_placeholders={"name": name, "model": self._screen.get("model") or "Écran", "org": hub.title},
+        )
+
 
 class LinkivOptionsFlow(OptionsFlow):
-    """« Partager avec Linkivi » (§303) : ce que les écrans de Linkivi voient de cette maison, et s'ils peuvent commander ces appareils."""
+    """« Partager avec Linkivi » (§303) : ce que les écrans de Linkivi voient de cette maison, et s'ils peuvent commander ces appareils.
+
+    En tête (§337) : « Ajouter automatiquement les nouveaux écrans » (sinon ils attendent dans Découvertes).
+    """
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
@@ -183,6 +237,7 @@ class LinkivOptionsFlow(OptionsFlow):
         o = self.config_entry.options
         schema = vol.Schema(
             {
+                vol.Optional(OPT_AUTO_ADD, default=o.get(OPT_AUTO_ADD, False)): selector.BooleanSelector(),
                 vol.Optional(OPT_AREAS, default=o.get(OPT_AREAS, [])): selector.AreaSelector(selector.AreaSelectorConfig(multiple=True)),
                 vol.Optional(OPT_LABELS, default=o.get(OPT_LABELS, [])): selector.LabelSelector(selector.LabelSelectorConfig(multiple=True)),
                 vol.Optional(OPT_ENTITIES, default=o.get(OPT_ENTITIES, [])): selector.EntitySelector(selector.EntitySelectorConfig(multiple=True)),

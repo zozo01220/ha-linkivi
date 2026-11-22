@@ -53,6 +53,7 @@ def add_new_screens(coordinator: LinkivCoordinator, async_add_entities: AddEntit
     @callback
     def _add() -> None:
         entities = []
+        known.intersection_update(coordinator.data)   # écran retiré de Home Assistant puis ré-ajouté : ses entités sont recréées
         for screen_id, screen in coordinator.data.items():
             if screen_id in known:
                 continue

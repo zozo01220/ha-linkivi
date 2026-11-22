@@ -1,5 +1,6 @@
 {
   "config": {
+    "flow_title": "{name}",
     "step": {
       "user": {
         "title": "Connecter Linkivi",
@@ -38,6 +39,16 @@
         "data": {
           "api_key": "Clé d'API (lkv_…)"
         }
+      },
+      "discovery_confirm": {
+        "title": "Nouvel écran Linkivi",
+        "description": "**{name}** ({model}) vient d'apparaître dans l'organisation {org}.\n\nChoisissez la pièce où le ranger, puis validez : il devient un appareil de Home Assistant.",
+        "data": {
+          "area_id": "Pièce"
+        },
+        "data_description": {
+          "area_id": "Facultatif : vous pourrez aussi le ranger plus tard depuis la page de l'appareil."
+        }
       }
     },
     "progress": {
@@ -55,7 +66,10 @@
       "wrong_account": "Ce code a été autorisé dans une autre organisation : l'intégration garde son accès précédent.",
       "expired": "Le code a expiré : recommencez.",
       "denied": "L'accès a été refusé dans Linkivi.",
-      "cannot_connect": "Linkivi est injoignable à cette adresse."
+      "cannot_connect": "Linkivi est injoignable à cette adresse.",
+      "screen_added": "« {name} » a été ajouté à Home Assistant.",
+      "screen_gone": "Cet écran n'existe plus dans Linkivi.",
+      "not_loaded": "L'intégration Linkivi n'est pas démarrée : rechargez-la, puis réessayez."
     }
   },
   "device_automation": {
@@ -274,10 +288,14 @@
         "title": "Partager avec Linkivi",
         "description": "Ce que les écrans de Linkivi montrent de cette maison. Rien n'est partagé tant que vous ne choisissez rien. Les serrures et alarmes ne sont jamais partagées par une pièce ou un libellé : choisissez-les une à une.",
         "data": {
+          "auto_add_screens": "Ajouter automatiquement les nouveaux écrans",
           "share_areas": "Pièces",
           "share_labels": "Libellés",
           "share_entities": "Entités",
           "share_commands": "Permettre aux écrans de commander ces appareils"
+        },
+        "data_description": {
+          "auto_add_screens": "Sinon, chaque nouvel écran de Linkivi attend dans Paramètres › Appareils et services › Découvertes, où vous choisissez sa pièce."
         }
       }
     }

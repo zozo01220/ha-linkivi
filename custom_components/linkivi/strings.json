@@ -1,5 +1,6 @@
 {
   "config": {
+    "flow_title": "{name}",
     "step": {
       "user": {
         "title": "Connect Linkivi",
@@ -38,6 +39,16 @@
         "data": {
           "api_key": "API key (lkv_…)"
         }
+      },
+      "discovery_confirm": {
+        "title": "New Linkivi screen",
+        "description": "**{name}** ({model}) just appeared in the organisation {org}.\n\nChoose the room to put it in, then submit: it becomes a Home Assistant device.",
+        "data": {
+          "area_id": "Room"
+        },
+        "data_description": {
+          "area_id": "Optional: you can also set it later from the device page."
+        }
       }
     },
     "progress": {
@@ -55,7 +66,10 @@
       "wrong_account": "This code was allowed in another organisation: the integration keeps its previous access.",
       "expired": "The code expired: start again.",
       "denied": "Access was refused in Linkivi.",
-      "cannot_connect": "Linkivi cannot be reached at this address."
+      "cannot_connect": "Linkivi cannot be reached at this address.",
+      "screen_added": "\"{name}\" was added to Home Assistant.",
+      "screen_gone": "This screen no longer exists in Linkivi.",
+      "not_loaded": "The Linkivi integration is not running: reload it, then try again."
     }
   },
   "device_automation": {
@@ -274,10 +288,14 @@
         "title": "Share with Linkivi",
         "description": "What the Linkivi screens show of this home. Nothing is shared until you choose. Locks and alarms are never shared through a room or a label: choose them one by one.",
         "data": {
+          "auto_add_screens": "Add new screens automatically",
           "share_areas": "Rooms",
           "share_labels": "Labels",
           "share_entities": "Entities",
           "share_commands": "Allow screens to control these devices"
+        },
+        "data_description": {
+          "auto_add_screens": "Otherwise each new Linkivi screen waits in Settings › Devices & services › Discovered, where you choose its room."
         }
       }
     }
