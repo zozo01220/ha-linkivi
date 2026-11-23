@@ -15,6 +15,7 @@ import aiohttp
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.util import dt as dt_util
 
 from .api import LinkivError
 from .const import LIVE_IMAGE_SECONDS, MAX_IMAGE_BYTES
@@ -59,6 +60,19 @@ async def read_image(hass: HomeAssistant, camera: str | None, image_url: str | N
     return None
 
 
+def _iso(value: Any) -> str | None:
+    """Heure de fin d'un compte à rebours en ISO 8601 avec fuseau (une heure sans fuseau est prise dans celui de Home Assistant)."""
+    if not value:
+        return None
+    if isinstance(value, str):
+        value = dt_util.parse_datetime(value)
+        if value is None:
+            return None
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=dt_util.get_default_time_zone())
+    return value.isoformat()
+
+
 async def show(
     hass: HomeAssistant,
     api: Any,
@@ -81,6 +95,10 @@ async def show(
         tag=data.get("tag"),
         image=image,
         live=bool(data.get("live")) and bool(data.get("camera")),
+        countdown_to=_iso(data.get("countdown_to")),
+        paused=bool(data.get("paused")),
+        more=int(data.get("more") or 0),
+        ended_message=data.get("ended_message"),
     )
     notice_id = res.get("noticeId")
     if image and notice_id and data.get("live") and data.get("camera"):

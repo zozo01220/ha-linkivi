@@ -17,6 +17,7 @@ Remplacez les entités d'exemple (`binary_sensor.sonnette`, `sensor.salon_batter
 | [Batterie d'une tablette entre 20 et 80 %](#6-batterie-dune-tablette-entre-20-et-80-) | [![Importer](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fzozo01220%2Fha-linkivi%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flinkivi%2Fbatterie-tablette.yaml) |
 | [Jour Tempo de demain](#7-jour-tempo-de-demain) | [![Importer](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fzozo01220%2Fha-linkivi%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flinkivi%2Ftempo.yaml) |
 | [Mode invité](#8-mode-invité) | [![Importer](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fzozo01220%2Fha-linkivi%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flinkivi%2Finvites.yaml) |
+| [Minuteur Alexa sur les écrans](#9-minuteur-alexa-sur-les-écrans) | [![Importer](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fzozo01220%2Fha-linkivi%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Flinkivi%2Fminuteur-alexa.yaml) |
 
 Sans le bouton : Paramètres › Automatisations › Blueprints › « Importer un blueprint », et collez l'adresse du fichier, par exemple `https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/sonnette.yaml`.
 
@@ -330,3 +331,48 @@ actions:
 3. Action **Choisir** : `arrive` → « Appareil » › l'écran › **Changer la liste** › Invités ; `leave` → **Changer la liste** › Accueil.
 
 Avec une location courte durée : remplacez le mode invité par un calendrier de réservations (iCal d'Airbnb ou d'un autre site, intégration « Calendrier distant ») : il passe à « on » pendant chaque séjour. Une composition Linkivi peut afficher le nom des voyageurs si vous partagez une entité texte (`input_text`) avec Linkivi.
+
+---
+
+## 9. Minuteur Alexa sur les écrans
+
+« Alexa, mets un minuteur de 10 minutes » : le minuteur s'affiche dans le **bandeau du haut** des écrans choisis (le bandeau du haut s'il y en a un, sinon un bandeau ajouté le temps du minuteur), compte jusqu'à zéro, **clignote en rouge** pendant qu'Alexa sonne, puis disparaît au « Alexa, stop ». Alexa sonne elle-même : rien à faire de ce côté. Sur un smartphone (pas de bandeau), une pastille en haut à droite.
+
+Il faut l'intégration **Alexa Media Player** (HACS) : chaque Alexa a un capteur **Prochain minuteur** (`sensor.<pièce>_<alexa>_prochain_minuteur`), dont l'état est l'heure de fin et l'attribut `brief.active` la liste des minuteurs en cours. Une automatisation par Alexa ; elle peut viser plusieurs écrans.
+
+```yaml
+alias: Minuteur de l'Alexa du séjour
+mode: restart
+triggers:
+  - trigger: state
+    entity_id: sensor.sejour_alexa_prochain_minuteur
+actions:
+  - if: "{{ states('sensor.sejour_alexa_prochain_minuteur') | as_datetime(None) is none }}"
+    then:   # « Alexa, stop » ou minuteur annulé : seul le minuteur est retiré
+      - action: linkivi.clear_display
+        target:
+          area_id: sejour
+        data:
+          tag: minuteur-alexa
+    else:
+      - action: linkivi.show_message
+        target:
+          area_id: sejour
+        data:
+          title: Minuteur
+          message: Alexa du séjour
+          place: banner_top
+          countdown_to: "{{ states('sensor.sejour_alexa_prochain_minuteur') }}"
+          ended_message: dites « Alexa, stop »
+          tag: minuteur-alexa
+```
+
+Le blueprint fait la même chose en plus complet : nom donné au minuteur (« minuteur pâtes »), pause, « +1 » quand il y en a plusieurs, rien de renvoyé quand seule l'heure du relevé change, et rouge gardé un moment si Alexa Media Player retire le minuteur dès qu'il sonne.
+
+**Les champs de « Afficher un message » qui servent ici** (utilisables pour tout compte à rebours : minuteur Home Assistant, fin d'un lave-linge…)
+- `place: banner_top` : le bandeau du haut, pris ou ajouté le temps du message ;
+- `countdown_to` : l'heure de fin ; l'écran compte seul, puis clignote en rouge avec le temps écoulé ; le message reste jusqu'à « Arrêter l'affichage » (au plus une heure après la fin) et la durée est ignorée ;
+- `paused` : chiffres figés (`countdown_to` = maintenant + temps restant) ; `more` : pastille « +1 » ; `ended_message` : le texte une fois fini ;
+- « Arrêter l'affichage » avec `tag` : ne retire que les messages de cette étiquette (une sonnette affichée en même temps reste).
+
+Un autre message « en bandeau » arrivé pendant le minuteur passe devant ; le minuteur revient à sa fin.

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from urllib.parse import quote
 from typing import Any
 
 import aiohttp
@@ -148,6 +149,10 @@ class LinkivApi:
         image: bytes | None = None,
         live: bool = False,
         blur: bool = False,
+        countdown_to: str | None = None,
+        paused: bool = False,
+        more: int = 0,
+        ended_message: str | None = None,
     ) -> dict[str, Any]:
         """Affiche un message un moment (accès screens:control) ; Linkivi dit pourquoi il refuse (écran hors ligne, en veille…).
 
@@ -169,15 +174,23 @@ class LinkivApi:
             body["title"] = title
         if message:
             body["message"] = message
+        if countdown_to:   # compte à rebours (§344) : la durée est ignorée, le message reste jusqu'à clear_display
+            body["countdownTo"] = countdown_to
+            body["paused"] = paused
+            body["more"] = more
+            if ended_message:
+                body["endedMessage"] = ended_message
+            body.pop("durationSeconds", None)
         return await self._request("POST", f"/screens/{screen_id}/display", json=body)
 
     async def display_image(self, screen_id: str, notice_id: str, image: bytes) -> dict[str, Any]:
         """Nouvelle image d'un message encore affiché (image « En direct » d'une caméra, §309)."""
         return await self._request("PUT", f"/screens/{screen_id}/display/image", json={"noticeId": notice_id, "image": base64.b64encode(image).decode("ascii")})
 
-    async def clear_display(self, screen_id: str) -> dict[str, Any]:
-        """Retire le message affiché : la diffusion reprend."""
-        return await self._request("DELETE", f"/screens/{screen_id}/display")
+    async def clear_display(self, screen_id: str, tag: str | None = None) -> dict[str, Any]:
+        """Retire le message affiché : la diffusion reprend. tag : seulement les messages de cette étiquette (§344)."""
+        path = f"/screens/{screen_id}/display" + (f"?tag={quote(tag)}" if tag else "")
+        return await self._request("DELETE", path)
 
     # ---------- lot 2 (§301) : listes, aperçu du direct, urgence ----------
 

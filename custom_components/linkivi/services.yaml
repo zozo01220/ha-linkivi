@@ -44,6 +44,7 @@ show_message:
           options:
             - full
             - banner
+            - banner_top
             - corner
     corner:
       default: bottom_right
@@ -72,11 +73,35 @@ show_message:
       example: "doorbell"
       selector:
         text:
+    countdown_to:
+      example: "2026-11-23 19:10:42"
+      selector:
+        datetime:
+    paused:
+      default: false
+      selector:
+        boolean:
+    more:
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 9
+          mode: box
+    ended_message:
+      example: "dites « Alexa, stop »"
+      selector:
+        text:
 
 clear_display:
   target:
     entity:
       integration: linkivi
+  fields:
+    tag:
+      example: "minuteur-alexa"
+      selector:
+        text:
 
 show_list:
   target:

@@ -202,7 +202,7 @@
         },
         "place": {
           "name": "Place",
-          "description": "Full screen, the banner cell that receives messages (full screen if the screen has none), or a card in a corner: the playlist keeps playing behind it."
+          "description": "Full screen, the banner cell that receives messages (full screen if the screen has none), the top banner (taken over, or added while the message lasts), or a card in a corner: the playlist keeps playing behind it."
         },
         "corner": {
           "name": "Corner",
@@ -223,12 +223,34 @@
         "tag": {
           "name": "Tag",
           "description": "A new corner card with the same tag replaces the old one instead of stacking (e.g. doorbell)."
+        },
+        "countdown_to": {
+          "name": "Countdown to",
+          "description": "End time of a countdown (e.g. an Alexa timer): the screen shows the time left, then blinks red with the time elapsed once it is over. The message then stays until « Stop the display » (one hour after the end at most); the duration is ignored."
+        },
+        "paused": {
+          "name": "Paused",
+          "description": "The countdown is paused: the digits stay still (countdown_to = now + time left)."
+        },
+        "more": {
+          "name": "Other countdowns",
+          "description": "Number of other countdowns running: a « +1 » badge."
+        },
+        "ended_message": {
+          "name": "Text once over",
+          "description": "Shown under the title once the countdown is over (e.g. « say Alexa, stop »)."
         }
       }
     },
     "clear_display": {
       "name": "Stop the display",
-      "description": "Removes the message: the playlist resumes at once."
+      "description": "Removes the message: the playlist resumes at once. With a tag, only the messages with that tag.",
+      "fields": {
+        "tag": {
+          "name": "Tag",
+          "description": "Only removes the messages with this tag (e.g. minuteur-alexa); empty: all of them."
+        }
+      }
     },
     "show_list": {
       "name": "Change the playlist",
@@ -270,6 +292,7 @@
       "options": {
         "full": "Full screen",
         "banner": "Banner",
+        "banner_top": "Top banner",
         "corner": "Corner"
       }
     },

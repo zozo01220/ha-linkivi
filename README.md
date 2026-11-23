@@ -1,8 +1,8 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.12.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.13.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
-Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Huit blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
+Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Neuf blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités, minuteur Alexa), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
 Chaque écran devient un **appareil** Home Assistant. À ne pas confondre avec l'intégration Home Assistant **de** Linkivi (lire et commander les appareils d'une maison sur les écrans) : ici, c'est l'inverse. Les deux se complètent (voir « Montrer les appareils de la maison sur les écrans »).
 
@@ -259,7 +259,8 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
-| **1.12.0** | **Nouveaux écrans dans les Découvertes** : un écran ajouté dans Linkivi est proposé dans Paramètres › Appareils et services › Découvertes, avec le choix de sa pièce. Option « Ajouter automatiquement les nouveaux écrans » pour garder l'ajout tout seul. |
+| **1.13.0** | **Minuteur Alexa** dans le bandeau du haut des écrans : blueprint « Minuteur Alexa sur les écrans » (Alexa Media Player). « Afficher un message » gagne la place **Bandeau du haut** et le **compte à rebours** (`countdown_to`, `paused`, `more`, `ended_message`) ; « Arrêter l'affichage » peut ne retirer qu'une **étiquette**. |
+| 1.12.0 | **Nouveaux écrans dans les Découvertes** : un écran ajouté dans Linkivi est proposé dans Paramètres › Appareils et services › Découvertes, avec le choix de sa pièce. Option « Ajouter automatiquement les nouveaux écrans » pour garder l'ajout tout seul. |
 | **1.11.0** | **Map Home Assistant** : le partage annonce la position de la maison (celle de Home Assistant), pour l'icône maison de la carte des personnes. Partagez les personnes (`person.…`) à montrer. |
 | **1.10.1** | Après un **redémarrage de Home Assistant**, les entités des intégrations lentes à démarrer (voitures, cloud, caméras) ne sont plus « introuvables » dans Linkivi : le partage est renvoyé quand Home Assistant a fini de démarrer, puis dès qu'une entité partagée apparaît ou disparaît. |
 | **1.10.0** | Les **caméras** partagées sont lues par les écrans eux-mêmes, sur le réseau de la maison : l'intégration envoie à Linkivi les adresses interne et externe de Home Assistant, et l'image est réduite à la taille affichée. |

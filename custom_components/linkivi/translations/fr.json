@@ -202,7 +202,7 @@
         },
         "place": {
           "name": "Emplacement",
-          "description": "Plein écran, la case du bandeau qui reçoit les messages (plein écran si l'écran n'en a pas), ou une carte dans un coin : la diffusion continue derrière."
+          "description": "Plein écran, la case du bandeau qui reçoit les messages (plein écran si l'écran n'en a pas), le bandeau du haut (pris, ou ajouté le temps du message), ou une carte dans un coin : la diffusion continue derrière."
         },
         "corner": {
           "name": "Coin",
@@ -223,12 +223,34 @@
         "tag": {
           "name": "Étiquette",
           "description": "Une nouvelle carte de même étiquette remplace l'ancienne au lieu de s'empiler (ex. sonnette)."
+        },
+        "countdown_to": {
+          "name": "Compte à rebours jusqu'à",
+          "description": "Heure de fin d'un compte à rebours (ex. un minuteur Alexa) : l'écran montre le temps restant, puis clignote en rouge avec le temps écoulé une fois fini. Le message reste alors jusqu'à « Arrêter l'affichage » (au plus une heure après la fin) ; la durée est ignorée."
+        },
+        "paused": {
+          "name": "En pause",
+          "description": "Le compte à rebours est en pause : les chiffres restent figés (countdown_to = maintenant + temps restant)."
+        },
+        "more": {
+          "name": "Autres comptes à rebours",
+          "description": "Nombre d'autres comptes à rebours en cours : pastille « +1 »."
+        },
+        "ended_message": {
+          "name": "Texte une fois fini",
+          "description": "Affiché sous le titre quand le compte à rebours est fini (ex. « dites « Alexa, stop » »)."
         }
       }
     },
     "clear_display": {
       "name": "Arrêter l'affichage",
-      "description": "Retire le message affiché : la diffusion reprend tout de suite."
+      "description": "Retire le message affiché : la diffusion reprend tout de suite. Avec une étiquette, seulement les messages de cette étiquette.",
+      "fields": {
+        "tag": {
+          "name": "Étiquette",
+          "description": "Ne retire que les messages de cette étiquette (ex. minuteur-alexa) ; vide : tous."
+        }
+      }
     },
     "show_list": {
       "name": "Changer la liste diffusée",
@@ -270,6 +292,7 @@
       "options": {
         "full": "Plein écran",
         "banner": "Bandeau",
+        "banner_top": "Bandeau du haut",
         "corner": "Coin"
       }
     },

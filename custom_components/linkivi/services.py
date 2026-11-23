@@ -46,13 +46,18 @@ SHOW_MESSAGE_SCHEMA = vol.All(
             vol.Optional("image_url"): cv.url,
             vol.Optional("live", default=False): cv.boolean,
             vol.Optional("tag"): vol.All(cv.string, vol.Length(max=40)),
+            # compte à rebours (§344, minuteur Alexa) : temps restant, puis rouge clignotant à zéro, jusqu'à clear_display
+            vol.Optional("countdown_to"): cv.datetime,
+            vol.Optional("paused", default=False): cv.boolean,
+            vol.Optional("more", default=0): vol.All(vol.Coerce(int), vol.Range(min=0, max=9)),
+            vol.Optional("ended_message"): vol.All(cv.string, vol.Length(max=300)),
         },
         extra=vol.ALLOW_EXTRA,
     ),
     cv.has_at_least_one_key("title", "message"),
 )
 
-CLEAR_DISPLAY_SCHEMA = vol.Schema({}, extra=vol.ALLOW_EXTRA)
+CLEAR_DISPLAY_SCHEMA = vol.Schema({vol.Optional("tag"): vol.All(cv.string, vol.Length(max=40))}, extra=vol.ALLOW_EXTRA)
 
 SHOW_LIST_SCHEMA = vol.Schema({vol.Required("playlist"): cv.string}, extra=vol.ALLOW_EXTRA)
 
@@ -141,8 +146,10 @@ async def async_register_services(hass: HomeAssistant) -> None:
         await _run(call, send)
 
     async def clear_display(call: ServiceCall) -> None:
+        tag = (call.data.get("tag") or "").strip() or None   # seulement les messages de cette étiquette (ex. le minuteur, §344)
+
         async def send(api, screen_id: str) -> None:
-            await api.clear_display(screen_id)
+            await api.clear_display(screen_id, tag=tag)
 
         await _run(call, send)
 
