@@ -45,6 +45,7 @@ show_message:
             - full
             - banner
             - banner_top
+            - banner_bottom
             - corner
     corner:
       default: bottom_right

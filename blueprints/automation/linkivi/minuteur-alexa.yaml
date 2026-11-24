@@ -1,8 +1,8 @@
 blueprint:
   name: Linkivi – Minuteur Alexa sur les écrans
   description: >-
-    « Alexa, mets un minuteur de 10 minutes » : le minuteur s'affiche dans le bandeau du haut des écrans choisis (pris, ou ajouté
-    le temps du minuteur), compte jusqu'à zéro, clignote en rouge pendant qu'Alexa sonne, puis disparaît au « Alexa, stop ».
+    « Alexa, mets un minuteur de 10 minutes » : le minuteur s'affiche sur les écrans choisis, au choix dans le bandeau du haut, le bandeau du bas (pris, ou ajouté
+    le temps du minuteur) ou en plein écran sur fond noir, compte jusqu'à zéro, clignote en rouge pendant qu'Alexa sonne, puis disparaît au « Alexa, stop ».
     Demande l'intégration Alexa Media Player (capteur « Prochain minuteur » de l'Alexa). Une automatisation par Alexa.
   domain: automation
   source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/minuteur-alexa.yaml
@@ -28,15 +28,28 @@ blueprint:
       selector:
         text:
     place:
-      name: Bandeau
+      name: Où afficher le minuteur
+      description: Le contenu de l'écran revient tel quel quand le minuteur est arrêté. Le plein écran masque le contenu pendant tout le minuteur.
       default: banner_top
       selector:
         select:
           options:
             - label: Bandeau du haut
               value: banner_top
+            - label: Bandeau du bas
+              value: banner_bottom
+            - label: Plein écran, fond noir
+              value: full
             - label: Bandeau qui reçoit les messages (le bas d'abord)
               value: banner
+    ring_full:
+      name: Plein écran à la sonnerie seulement
+      description: >-
+        Bandeau pendant le décompte (celui du choix ci-dessus), puis plein écran rouge clignotant quand Alexa sonne.
+        Sans effet si « Plein écran » est déjà choisi.
+      default: false
+      selector:
+        boolean:
     ended:
       name: Texte une fois fini
       default: dites « Alexa, stop »
@@ -63,6 +76,8 @@ triggers:
 
 variables:
   timer: !input timer
+  place: !input place
+  ring_full: !input ring_full
   alexa_name: !input alexa_name
   brief: "{{ state_attr(timer, 'brief') }}"
   active: "{{ brief.active if brief is mapping and brief.active is defined and brief.active is iterable else [] }}"
@@ -105,6 +120,22 @@ actions:
               more: "{{ more }}"
               ended_message: !input ended
               tag: minuteur-alexa
+          # « plein écran à la sonnerie » : on attend la fin du minuteur, puis le même message passe en plein écran (rouge clignotant)
+          - if: "{{ ring_full and place != 'full' and not paused }}"
+            then:
+              - delay:
+                  seconds: "{{ [(as_datetime(end) - now()).total_seconds(), 0] | max | int }}"
+              - action: linkivi.show_message
+                continue_on_error: true
+                target: !input screens
+                data:
+                  title: "{{ label | capitalize if label else 'Minuteur' }}"
+                  message: "{{ alexa_name }}"
+                  place: full
+                  countdown_to: "{{ end }}"
+                  more: "{{ more }}"
+                  ended_message: !input ended
+                  tag: minuteur-alexa
     default:
       # plus de minuteur : « Alexa, stop », annulé, ou retiré dès la sonnerie (on garde alors le rouge un moment)
       - variables:
@@ -113,6 +144,18 @@ actions:
             {{ e is not none and ((now() - e).total_seconds() | abs) < 20 }}
       - if: "{{ rang }}"
         then:
+          - if: "{{ ring_full and place != 'full' }}"
+            then:
+              - action: linkivi.show_message
+                continue_on_error: true
+                target: !input screens
+                data:
+                  title: Minuteur
+                  message: "{{ alexa_name }}"
+                  place: full
+                  countdown_to: "{{ trigger.from_state.state }}"
+                  ended_message: !input ended
+                  tag: minuteur-alexa
           - delay: !input keep
       - action: linkivi.clear_display
         continue_on_error: true

@@ -293,6 +293,7 @@
         "full": "Full screen",
         "banner": "Banner",
         "banner_top": "Top banner",
+        "banner_bottom": "Bottom banner",
         "corner": "Corner"
       }
     },

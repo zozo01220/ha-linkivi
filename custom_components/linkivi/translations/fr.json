@@ -293,6 +293,7 @@
         "full": "Plein écran",
         "banner": "Bandeau",
         "banner_top": "Bandeau du haut",
+        "banner_bottom": "Bandeau du bas",
         "corner": "Coin"
       }
     },

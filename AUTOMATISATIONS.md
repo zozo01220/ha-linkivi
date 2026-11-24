@@ -370,9 +370,11 @@ actions:
 Le blueprint fait la même chose en plus complet : nom donné au minuteur (« minuteur pâtes »), pause, « +1 » quand il y en a plusieurs, rien de renvoyé quand seule l'heure du relevé change, et rouge gardé un moment si Alexa Media Player retire le minuteur dès qu'il sonne.
 
 **Les champs de « Afficher un message » qui servent ici** (utilisables pour tout compte à rebours : minuteur Home Assistant, fin d'un lave-linge…)
-- `place: banner_top` : le bandeau du haut, pris ou ajouté le temps du message ;
+- `place: banner_top` ou `banner_bottom` : le bandeau du haut ou du bas, pris ou ajouté le temps du message ; `place: full` : plein écran sur fond noir (gros chiffres), le contenu est masqué pendant le minuteur ;
 - `countdown_to` : l'heure de fin ; l'écran compte seul, puis clignote en rouge avec le temps écoulé ; le message reste jusqu'à « Arrêter l'affichage » (au plus une heure après la fin) et la durée est ignorée ;
 - `paused` : chiffres figés (`countdown_to` = maintenant + temps restant) ; `more` : pastille « +1 » ; `ended_message` : le texte une fois fini ;
 - « Arrêter l'affichage » avec `tag` : ne retire que les messages de cette étiquette (une sonnette affichée en même temps reste).
 
 Un autre message « en bandeau » arrivé pendant le minuteur passe devant ; le minuteur revient à sa fin.
+
+**Où afficher le minuteur (blueprint, 1.14.0).** Le champ « Où afficher le minuteur » propose Bandeau du haut (défaut, comme avant), Bandeau du bas ou Plein écran, fond noir ; une automatisation par Alexa, donc « Alexa cuisine → plein écran sur l'écran de la cuisine » et « Alexa séjour → bandeau du haut sur le salon » vivent côte à côte. L'option « Plein écran à la sonnerie seulement » garde un bandeau pendant le décompte et passe en plein écran rouge clignotant à zéro. L'alerte d'urgence passe toujours devant le minuteur, qui revient ensuite. Les automatisations créées avant la 1.14.0 gardent le bandeau du haut sans rien changer.
