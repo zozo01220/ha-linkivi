@@ -202,7 +202,7 @@
         },
         "place": {
           "name": "Emplacement",
-          "description": "Plein écran, la case du bandeau qui reçoit les messages (plein écran si l'écran n'en a pas), le bandeau du haut (pris, ou ajouté le temps du message), ou une carte dans un coin : la diffusion continue derrière."
+          "description": "Plein écran, le bandeau du haut ou du bas (pris, ou ajouté le temps du message), ou une carte dans un coin : la diffusion continue derrière."
         },
         "corner": {
           "name": "Coin",
@@ -291,7 +291,6 @@
     "place": {
       "options": {
         "full": "Plein écran",
-        "banner": "Bandeau",
         "banner_top": "Bandeau du haut",
         "banner_bottom": "Bandeau du bas",
         "corner": "Coin"

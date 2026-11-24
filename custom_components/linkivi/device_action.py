@@ -19,7 +19,7 @@ from homeassistant.helpers import selector
 from homeassistant.helpers.typing import ConfigType, TemplateVarsType
 
 from .api import LinkivError
-from .const import CMD_REBOOT, CMD_RESTART_PLAYER, CMD_SCREEN_OFF, CMD_WAKE, CORNERS, DOMAIN, LOOKS, PLACES
+from .const import CMD_REBOOT, CMD_RESTART_PLAYER, CMD_SCREEN_OFF, CMD_WAKE, CORNERS, DOMAIN, LOOKS, PLACES, PLACES_SHOWN
 from .message import read_image, show
 
 SHOW_MESSAGE, CLEAR, SHOW_LIST, SCREEN_OFF, WAKE, RESTART_PLAYER, REBOOT, EMERGENCY = (
@@ -87,7 +87,7 @@ async def async_get_action_capabilities(hass: HomeAssistant, config: ConfigType)
                 {
                     vol.Optional("title"): selector.TextSelector(),
                     vol.Optional("message"): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
-                    vol.Optional("place", default="corner"): selector.SelectSelector(selector.SelectSelectorConfig(options=PLACES, translation_key="place")),
+                    vol.Optional("place", default="corner"): selector.SelectSelector(selector.SelectSelectorConfig(options=PLACES_SHOWN, translation_key="place")),
                     vol.Optional("corner", default=CORNERS[0]): selector.SelectSelector(selector.SelectSelectorConfig(options=CORNERS, translation_key="corner")),
                     vol.Optional("look", default=LOOKS[0]): selector.SelectSelector(selector.SelectSelectorConfig(options=LOOKS, translation_key="look")),
                     vol.Optional("blur", default=False): selector.BooleanSelector(),

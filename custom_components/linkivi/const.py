@@ -53,7 +53,9 @@ SERVICE_START_EMERGENCY = "start_emergency"
 SERVICE_END_EMERGENCY = "end_emergency"
 LOOKS = ["information", "attention"]
 # Places d'un message (§309) : plein écran, bandeau, ou carte dans un coin (la diffusion continue) ; coins possibles.
+# « banner » (ancien bandeau unique) reste accepté pour les automatisations existantes, mais n'est plus proposé dans les listes
 PLACES = ["full", "banner", "banner_top", "banner_bottom", "corner"]
+PLACES_SHOWN = ["full", "banner_top", "banner_bottom", "corner"]
 CORNERS = ["bottom_right", "bottom_left", "top_right", "top_left"]
 # Image « En direct » d'une caméra : nouvelle image toutes les 2 s pendant l'affichage.
 LIVE_IMAGE_SECONDS = 2

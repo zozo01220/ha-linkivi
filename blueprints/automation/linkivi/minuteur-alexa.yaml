@@ -40,8 +40,6 @@ blueprint:
               value: banner_bottom
             - label: Plein écran, fond noir
               value: full
-            - label: Bandeau qui reçoit les messages (le bas d'abord)
-              value: banner
     ring_full:
       name: Plein écran à la sonnerie seulement
       description: >-

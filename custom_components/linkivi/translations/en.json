@@ -202,7 +202,7 @@
         },
         "place": {
           "name": "Place",
-          "description": "Full screen, the banner cell that receives messages (full screen if the screen has none), the top banner (taken over, or added while the message lasts), or a card in a corner: the playlist keeps playing behind it."
+          "description": "Full screen, the top or bottom banner (taken over, or added while the message lasts), or a card in a corner: the playlist keeps playing behind it."
         },
         "corner": {
           "name": "Corner",
@@ -291,7 +291,6 @@
     "place": {
       "options": {
         "full": "Full screen",
-        "banner": "Banner",
         "banner_top": "Top banner",
         "banner_bottom": "Bottom banner",
         "corner": "Corner"

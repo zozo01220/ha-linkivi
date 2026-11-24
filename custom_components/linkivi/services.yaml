@@ -43,7 +43,6 @@ show_message:
           translation_key: place
           options:
             - full
-            - banner
             - banner_top
             - banner_bottom
             - corner

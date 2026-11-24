@@ -259,7 +259,7 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
-| **1.14.1** | Les actions « Afficher un message » et « Arrêter l'affichage » s'envoient à tous les écrans **en même temps** (avant : l'un après l'autre, donc un minuteur sur plusieurs écrans s'arrêtait avec du retard). |
+| **1.14.1** | Les actions « Afficher un message » et « Arrêter l'affichage » s'envoient à tous les écrans **en même temps**, et l'ancien emplacement **Bandeau** n'est plus proposé (toujours accepté par les automatisations existantes ; le haut et le bas le remplacent) (avant : l'un après l'autre, donc un minuteur sur plusieurs écrans s'arrêtait avec du retard). |
 | **1.14.0** | **Minuteur Alexa : où l'afficher.** « Afficher un message » gagne la place **Bandeau du bas** (`banner_bottom`) ; avec `countdown_to`, la place **Plein écran** (`full`) montre le compte à rebours en gros sur fond noir. Le blueprint « Minuteur Alexa sur les écrans » propose : bandeau du haut, bandeau du bas ou plein écran, et l'option « plein écran à la sonnerie seulement ». |
 | **1.13.0** | **Minuteur Alexa** dans le bandeau du haut des écrans : blueprint « Minuteur Alexa sur les écrans » (Alexa Media Player). « Afficher un message » gagne la place **Bandeau du haut** et le **compte à rebours** (`countdown_to`, `paused`, `more`, `ended_message`) ; « Arrêter l'affichage » peut ne retirer qu'une **étiquette**. |
 | 1.12.0 | **Nouveaux écrans dans les Découvertes** : un écran ajouté dans Linkivi est proposé dans Paramètres › Appareils et services › Découvertes, avec le choix de sa pièce. Option « Ajouter automatiquement les nouveaux écrans » pour garder l'ajout tout seul. |

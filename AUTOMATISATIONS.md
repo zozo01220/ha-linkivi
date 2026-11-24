@@ -297,7 +297,7 @@ actions:
 **Pas à pas**
 1. Déclencheur **Heure** : 19:00.
 2. Condition **État** : le capteur de couleur, état Rouge ou Blanc (tels que votre intégration les écrit : regardez l'état du capteur dans Outils de développement › États).
-3. Action **Linkivi : Afficher un message**, Emplacement Coin (ou Bandeau), Durée 3600.
+3. Action **Linkivi : Afficher un message**, Emplacement Coin (ou Bandeau du haut / du bas), Durée 3600.
 
 Le même schéma sert pour Ecowatt, les heures creuses ou un surplus solaire (« C'est le moment de lancer une machine »).
 
