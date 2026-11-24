@@ -102,16 +102,16 @@ variables:
   was_playing: "{{ trigger.from_state is not none and trigger.from_state.state == 'playing' }}"
   title: "{{ state_attr(player, 'media_title') or '' }}"
   old_title: "{{ (trigger.from_state.attributes.media_title if trigger.from_state is not none else '') or '' }}"
+  # heures de silence : une seule expression, pour que Home Assistant en fasse un vrai booléen (un « false » écrit en texte compterait comme vrai)
   quiet: >-
-    {% set t = now().strftime('%H:%M:%S') %}
-    {% if quiet_from == quiet_to %}false
-    {% elif quiet_from < quiet_to %}{{ quiet_from <= t < quiet_to }}
-    {% else %}{{ t >= quiet_from or t < quiet_to }}{% endif %}
+    {{ (quiet_from | string) != (quiet_to | string) and (
+         ((quiet_from | string) <= now().strftime('%H:%M:%S') < (quiet_to | string)) if (quiet_from | string) < (quiet_to | string)
+         else (now().strftime('%H:%M:%S') >= (quiet_from | string) or now().strftime('%H:%M:%S') < (quiet_to | string))) }}
   # nouveau morceau ; en permanent, aussi la reprise du même morceau après une pause (il avait été retiré)
   show: >-
-    {{ playing and title != '' and not quiet and (
-         (trigger.id == 'title' and title != old_title) or
-         (trigger.id == 'state' and permanent and not was_playing and title == old_title)) }}
+    {{ playing and (title | string) != '' and not quiet and (
+         (trigger.id == 'title' and (title | string) != (old_title | string)) or
+         (trigger.id == 'state' and permanent and not was_playing and (title | string) == (old_title | string))) }}
   hide: "{{ trigger.id == 'state' and permanent and was_playing and not playing }}"
 
 conditions:
