@@ -38,7 +38,7 @@ blueprint:
               value: corner
     display:
       name: Affichage
-      description: Permanent : reste tant que la musique joue, retiré à la pause ou à l'arrêt, remplacé au morceau suivant.
+      description: "Permanent : reste tant que la musique joue, retiré à la pause ou à l'arrêt, remplacé au morceau suivant."
       default: timed
       selector:
         select:
@@ -67,7 +67,7 @@ blueprint:
         boolean:
     quiet_from:
       name: Ne rien afficher à partir de
-      description: Avec « jusqu'à », des heures de silence (par exemple la nuit). Deux heures égales : jamais de silence.
+      description: "Avec « jusqu'à », des heures de silence (par exemple la nuit). Deux heures égales : jamais de silence."
       default: "00:00:00"
       selector:
         time:
