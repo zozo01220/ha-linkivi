@@ -1,8 +1,8 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.17.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.18.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
-Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Neuf blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités, minuteur Alexa), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
+Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écran Linkivi » est fournie pour le tableau de bord. **Dix blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités, minuteur Alexa, musique en cours), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
 Chaque écran devient un **appareil** Home Assistant. À ne pas confondre avec l'intégration Home Assistant **de** Linkivi (lire et commander les appareils d'une maison sur les écrans) : ici, c'est l'inverse. Les deux se complètent (voir « Montrer les appareils de la maison sur les écrans »).
 
@@ -54,16 +54,16 @@ Si Linkivi retire l'accès (clé révoquée ou expirée), Home Assistant demande
 | **Dernière connexion** | capteur (désactivé par défaut) | Dernier contact de l'écran. |
 | **Dernier démarrage** | capteur (diagnostic) | Dernier démarrage de l'appareil, remonté par le player : un redémarrage inattendu se voit ici. |
 | **Version du player** | capteur (diagnostic) | Version de Linkivi Player. Attributs : système et modèle de l'appareil. |
-| **Température du processeur** | capteur (diagnostic) | En °C. Raspberry Pi. |
-| **Disque utilisé** | capteur (diagnostic) | En %, disque système. Attributs : espace libre et taille (Go). Raspberry Pi et PC Windows. |
-| **Mémoire utilisée** | capteur (diagnostic) | En %. Raspberry Pi et PC Windows. |
-| **Signal Wi-Fi** | capteur (diagnostic) | En dBm. Raspberry Pi en Wi-Fi (vide en Ethernet). |
+| **Température du processeur** | capteur (diagnostic) | En °C. Raspberry Pi ; Android seulement si l'appareil laisse lire ses capteurs thermiques. |
+| **Disque utilisé** | capteur (diagnostic) | En %, disque système. Attributs : espace libre et taille (Go). Raspberry Pi, PC Windows et Android. |
+| **Mémoire utilisée** | capteur (diagnostic) | En %. Raspberry Pi, PC Windows et Android. |
+| **Signal Wi-Fi** | capteur (diagnostic) | En dBm. Raspberry Pi en Wi-Fi, Android 10 et plus en Wi-Fi (vide en Ethernet). |
 | **Alimentation insuffisante** | capteur binaire (diagnostic) | Le Raspberry Pi signale une sous-tension (bloc d'alimentation trop faible, câble trop long). Attribut : déjà arrivé depuis le démarrage. |
 | **Aperçu du direct** | caméra | Ce que l'écran affiche (players Android et Raspberry Pi). Une nouvelle image est demandée au plus toutes les 60 s quand on la regarde. Un écran portrait peut arriver couché. |
 | **Message** | notification | Pour l'action `notify.send_message` : une carte en coin (bas droite, 15 s), la diffusion continue. |
 | **Batterie** et **En charge** | capteur, capteur binaire | Smartphones et tablettes Android seulement : niveau et branché ou non. |
 
-Les mesures de santé (température, disque, mémoire, Wi-Fi, alimentation) arrivent toutes les 5 minutes ; elles existent sur tous les écrans et restent à **Inconnu** quand le player ne les mesure pas (Android, navigateur, players plus anciens que Raspberry Pi 0.1.13 et Windows 0.3.4).
+Les mesures de santé (température, disque, mémoire, Wi-Fi, alimentation) arrivent toutes les 5 minutes ; elles existent sur tous les écrans et restent à **Inconnu** quand le player ne les mesure pas (navigateur, players plus anciens que Raspberry Pi 0.1.13, Windows 0.3.4 et Android 1.3.9).
 
 La fiche de l'appareil (Paramètres › Appareils) montre aussi le **matériel** (modèle et système, par exemple « Raspberry Pi 4 Model B · Raspberry Pi OS 12 ») et le **micrologiciel** (version du player) ; elle suit les mises à jour du player. Un écran jamais contacté par son player n'a encore ni l'un ni l'autre.
 
@@ -93,6 +93,7 @@ Dans l'éditeur d'automatisations (Ajouter une action › Linkivi) ou dans Outil
 |---|---|
 | `linkivi.show_message` | Affiche un message par-dessus la diffusion (voir « Afficher un message sur un écran »). |
 | `linkivi.show_countdown` | Affiche un compte à rebours jusqu'à une heure de fin (minuteur, fin d'un lave-linge…), rouge clignotant à zéro, jusqu'à « Arrêter l'affichage ». |
+| `linkivi.show_mediaplayer_playing` | Affiche la musique en cours d'un lecteur (pochette, titre, artiste, barre du morceau), pendant X secondes ou en permanence ; voir le blueprint « Musique en cours sur les écrans ». |
 | `linkivi.clear_display` | Retire le message tout de suite ; avec `tag`, seulement les messages de cette étiquette (ex. `countdown`). |
 | `linkivi.show_list` | Diffuse une autre liste (`playlist` : nom de la liste). |
 | `linkivi.start_emergency` | Déclenche l'alerte d'urgence (`title` 40 caractères, `message` 300) ; sans cible, sur tous les écrans. |
@@ -123,49 +124,29 @@ Chaque écran propose quatre **déclencheurs** dans l'éditeur d'automatisations
 
 Tous les événements de Linkivi passent aussi sur le bus de Home Assistant sous le nom `linkivi_event` (`type`, `event`, `screen_id`, `device_id`, `data`).
 
-## La carte « Écrans Linkivi »
+## La carte « Écran Linkivi »
 
-Une carte pour le tableau de bord, fournie par l'intégration. Après l'installation (ou une mise à jour), **redémarrez Home Assistant**, puis rechargez la page avec Ctrl+F5.
+Une carte pour le tableau de bord, fournie par l'intégration : **un écran par carte**, avec tout ce qu'on sait de lui et tout ce qu'on peut lui faire (depuis la 1.18.0, elle remplace la carte « Écrans Linkivi » de plusieurs écrans, qui n'existe plus : un tableau de bord qui l'utilisait affiche « carte introuvable » ; posez une carte « Écran Linkivi » par écran). Après l'installation ou une mise à jour, **redémarrez Home Assistant**, puis rechargez la page du navigateur.
 
-Si la carte n'apparaît pas toute seule (« Custom element doesn't exist »), déclarez-la une fois : Paramètres › Tableaux de bord › menu ⋮ › Ressources (mode avancé activé dans votre profil), puis ajoutez `/linkivi/linkivi-screens-card.js` en type **Module JavaScript**. Le fichier vient de l'intégration et se met à jour avec elle. Pour vérifier sans rien déclarer, ouvrez la console du navigateur (F12) et tapez `!!customElements.get("linkivi-screens-card")`.
+Modifier le tableau de bord › Ajouter une carte › **Écran Linkivi**, puis choisissez l'écran. Elle retrouve seule les entités de l'appareil, suit le thème (clair ou sombre) et la langue du profil.
 
-Modifier le tableau de bord › Ajouter une carte › **Écrans Linkivi**. Elle trouve toute seule les écrans de l'intégration, avec leurs noms, aires et appareils ; un écran ajouté plus tard dans Linkivi y apparaît seul. Elle reprend les couleurs du thème (clair ou sombre), en français ou en anglais selon votre profil. En en-tête, un anneau et un résumé du parc (« 5 en ligne · 1 hors ligne »), avec « Tout allumer » et « Tout éteindre » pour les écrans affichés.
-
-| Style | Rendu |
-|---|---|
-| `list` (par défaut) | « Verre » : une ligne givrée par écran sur un fond dégradé. Un médaillon dont la couleur dit l'état (vert allumé, bleu en veille, orange en cours, gris hors ligne), le redémarrage du player, le menu ⋮ (redémarrer ou éteindre l'appareil, avec confirmation) et un interrupteur lumineux « Écran ». |
-| `cards` | « Écrans » : chaque écran est une petite télé dont l'état se lit sur l'écran (bleu et reflet avec un voyant qui bat, noir en veille, hachuré hors ligne, roue pendant une commande). Dessous : le nom, le bouton d'allumage rond, le redémarrage du player et le menu ⋮. Se met en colonnes selon la largeur. |
-
-Sur chaque écran :
-
-- **Liste diffusée** sous chaque écran : un clic la change, publiée aussitôt ; une bulle « Annuler » remet l'ancienne pendant 10 s. Pour un écran sans commandes, la liste passe à droite, en pastille.
-- **Aperçu du direct** dans la télé (style `cards`) ou en vignette (style `list`), pour un écran allumé et en ligne : une nouvelle image toutes les `preview_interval` minutes (5 par défaut), seulement quand la carte est visible, car chaque image demande une capture à l'appareil.
-- **Fenêtre d'un écran** (clic sur la télé ou la ligne) : grand aperçu, actualisé à l'ouverture puis chaque minute, liste diffusée, état, dernière connexion et commandes.
-- **Alerte d'urgence** : bandeau rouge en tête de carte tant qu'une alerte est en cours, avec « Lever l'alerte » ; « Déclencher une alerte… » dans le menu ⋮ de la carte (appui maintenu 1,5 s), sur les écrans de la carte (filtre `screens`) ou sur tous. Réservé aux administrateurs de Home Assistant, sauf `emergency_for_all: true`.
-- Options : `show_playlist`, `show_preview`, `preview_interval`, `show_emergency`, `emergency_for_all`.
-
-Une commande montre « en cours » aussitôt (l'état confirmé arrive par le canal temps réel, en quelques secondes) ; si Linkivi refuse, sa raison s'affiche en notification. Les animations s'arrêtent si le système demande moins de mouvement.
+- **En-tête** : nom, pièce et type d'appareil, pastille d'état (en ligne, en veille, en pause, mise à jour, hors ligne) et menu ⋮ : « Ouvrir dans Linkivi », « Fiche de l'appareil », **« Redémarrer l'appareil… »** et **« Éteindre l'appareil… »** (avec confirmation ; seulement si l'appareil sait le faire).
+- **Aperçu du direct** (Android et Raspberry Pi), une image par minute et un bouton pour l'actualiser ; « Écran en veille » ou « Hors ligne, dernier contact il y a… » à la place.
+- **Liste diffusée** : un clic la change, publiée aussitôt.
+- **Commandes** : « Mettre en veille » (ou « Réveiller » quand l'écran dort) et « Redémarrer le player ».
+- **Diagnostic** : processeur, disque (avec l'espace libre), mémoire, Wi-Fi, alimentation et batterie. Une mesure que l'appareil ne donne pas affiche « Inconnu ». Orange puis rouge au-delà de : processeur 70 / 80 °C, disque 80 / 90 %, mémoire 85 / 95 %, Wi-Fi −70 / −80 dBm, batterie 20 / 10 %, et rouge si l'alimentation est insuffisante.
+- **Pied** : version du player, matériel et système, dernier démarrage.
 
 ```yaml
-type: custom:linkivi-screens-card   # tout le reste est facultatif
-title: Écrans Linkivi
-style: list                         # list | cards
-screens:                            # absent : tous les écrans (noms de Linkivi)
-  - Rpi borne 01
-  - Ecran photos
-show_player_restart: true
-show_device_actions: true           # le menu ⋮ (ou les boutons Appareil / Éteindre)
-show_group_buttons: true            # Tout allumer / Tout éteindre
-hide_offline: false
-show_playlist: true                 # liste diffusée sous chaque écran
-show_preview: true                  # aperçu du direct
-preview_interval: 5                 # minutes entre deux images
-show_emergency: true                # bandeau et menu de l'alerte d'urgence
-emergency_for_all: false            # true : pas seulement les administrateurs
-accent_color: "#2a86ee"             # couleur d'accent (bleu Linkivi par défaut)
+type: custom:linkivi-screen-card
+device: 0123456789abcdef0123456789abcdef   # l'appareil (choisi dans l'éditeur visuel)
+show_preview: true
+show_commands: true
+show_diagnostic: true
+style: normal                               # normal | glass
 ```
 
-L'éditeur visuel permet les mêmes réglages. Si la carte n'apparaît pas dans la liste, rechargez la page sans le cache ; sinon, vérifiez dans les journaux de Home Assistant que l'intégration Linkivi est bien démarrée.
+Si la carte n'apparaît pas (« Custom element doesn't exist »), déclarez-la une fois : Paramètres › Tableaux de bord › menu ⋮ › Ressources, puis ajoutez `/linkivi/linkivi-screen-card.js` en type **Module JavaScript**. Pour vérifier, dans la console du navigateur (F12) : `!!customElements.get("linkivi-screen-card")`.
 
 ## Afficher un message sur un écran
 
@@ -275,6 +256,7 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
+| **1.18.0** | **Carte « Écran Linkivi »** (un écran par carte : aperçu, liste, veille ou réveil, redémarrages dans le menu ⋮, diagnostic, version) ; elle **remplace la carte « Écrans Linkivi »**, supprimée. **Musique en cours** : action `show_mediaplayer_playing` et blueprint « Musique en cours sur les écrans » (bandeau, coin ou plein écran ; X secondes ou permanent ; réveil au choix). Un écran réveillé par un message retourne en veille quand on le retire. Demande Linkivi du 25 nov. 2026 ou plus récent. |
 | **1.17.0** | **Santé de l'appareil, mesures** : température du processeur, disque utilisé, mémoire utilisée, signal Wi-Fi (diagnostic) et **Alimentation insuffisante**. Raspberry Pi 0.1.13 : tout ; PC Windows 0.3.4 : disque et mémoire ; ailleurs « Inconnu ». Demande Linkivi du 24 nov. 2026 (soir) ou plus récent. |
 | **1.16.0** | **Santé de l'appareil** : capteurs **Dernier démarrage** et **Version du player** (diagnostic), matériel et micrologiciel sur la fiche de l'appareil, tenus à jour. Demande Linkivi du 24 nov. 2026 ou plus récent (sinon ces valeurs restent vides). |
 | **1.15.3** | Bouton **Réveiller** sur chaque écran (réveil d'une heure, comme l'interrupteur « Écran » allumé). |

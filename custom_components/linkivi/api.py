@@ -153,6 +153,8 @@ class LinkivApi:
         paused: bool = False,
         more: int = 0,
         ended_message: str | None = None,
+        music: dict[str, Any] | None = None,
+        permanent: bool = False,
     ) -> dict[str, Any]:
         """Affiche un message un moment (accès screens:control) ; Linkivi dit pourquoi il refuse (écran hors ligne, en veille…).
 
@@ -180,6 +182,11 @@ class LinkivApi:
             body["more"] = more
             if ended_message:
                 body["endedMessage"] = ended_message
+            body.pop("durationSeconds", None)
+        if music:   # musique en cours (§351) : titre = le morceau, image = la pochette
+            body["music"] = music
+        if permanent:   # jusqu'à clear_display (§351), la durée est ignorée
+            body["permanent"] = True
             body.pop("durationSeconds", None)
         return await self._request("POST", f"/screens/{screen_id}/display", json=body)
 

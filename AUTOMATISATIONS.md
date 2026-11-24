@@ -378,3 +378,30 @@ Le blueprint fait la même chose en plus complet : nom donné au minuteur (« mi
 Un autre message « en bandeau » arrivé pendant le minuteur passe devant ; le minuteur revient à sa fin.
 
 **Où afficher le minuteur (blueprint, 1.14.0).** Le champ « Où afficher le minuteur » propose Bandeau du haut (défaut, comme avant), Bandeau du bas ou Plein écran, fond noir ; une automatisation par Alexa, donc « Alexa cuisine → plein écran sur l'écran de la cuisine » et « Alexa séjour → bandeau du haut sur le salon » vivent côte à côte. L'option « Plein écran à la sonnerie seulement » garde un bandeau pendant le décompte et passe en plein écran rouge clignotant à zéro. L'alerte d'urgence passe toujours devant le minuteur, qui revient ensuite. Les automatisations créées avant la 1.14.0 gardent le bandeau du haut sans rien changer.
+
+## 10. Musique en cours sur les écrans
+
+Blueprint **« Musique en cours sur les écrans »** (`blueprints/automation/linkivi/musique-en-cours.yaml`, intégration 1.18.0) : à chaque nouveau morceau d'un ou plusieurs lecteurs (Echo avec Alexa Media Player, Sonos, Spotify…), la pochette, le titre, l'artiste et la barre du morceau s'affichent sur les écrans choisis.
+
+- **Emplacement** : bandeau du haut ou du bas (un écran sans bandeau en reçoit un le temps de l'affichage), plein écran sur fond flou de la pochette, ou carte dans un coin.
+- **Affichage** : pendant X secondes à chaque morceau, ou **permanent** : tant que la musique joue, retiré à la pause ou à l'arrêt, remplacé au morceau suivant.
+- **Réveiller l'écran** : activé, un écran en veille se réveille pour la musique et retourne en veille quand l'affichage est retiré ; désactivé, rien ne s'affiche sur un écran en veille.
+- Une pause puis une reprise, ou le même morceau relancé, ne réaffichent rien (en permanent, la reprise réaffiche le morceau, retiré à la pause).
+- Deux lecteurs qui jouent ensemble : le dernier morceau qui commence remplace l'autre (étiquette `music`).
+- Heures de silence : « Ne rien afficher à partir de… jusqu'à… ».
+
+Sans blueprint, l'action seule :
+
+```yaml
+action: linkivi.show_mediaplayer_playing
+target:
+  area_id: salon
+data:
+  media_player: media_player.echo_salon
+  place: banner_top        # banner_top | banner_bottom | full | corner
+  display: timed           # timed | permanent
+  duration: 15
+  wake: false
+```
+
+Pour retirer un affichage permanent : `linkivi.clear_display` avec `tag: music`.

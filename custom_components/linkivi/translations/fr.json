@@ -336,6 +336,45 @@
         }
       }
     },
+    "show_mediaplayer_playing": {
+      "name": "Afficher la musique en cours",
+      "description": "Affiche la pochette, le titre et l'artiste du morceau en cours d'un lecteur (Echo, Sonos…), avec la barre du morceau. Pendant X secondes, ou en permanence jusqu'à « Arrêter l'affichage ». Un écran sans bandeau en reçoit un le temps de l'affichage.",
+      "sections": {
+        "options": {
+          "name": "Options"
+        }
+      },
+      "fields": {
+        "media_player": {
+          "name": "Lecteur",
+          "description": "Le lecteur dont on affiche le morceau ; il doit être en lecture."
+        },
+        "display": {
+          "name": "Affichage",
+          "description": "Pendant X secondes, ou permanent : jusqu'à « Arrêter l'affichage » (étiquette music), 12 h au plus."
+        },
+        "duration": {
+          "name": "Durée",
+          "description": "En secondes, de 5 à 3600 ; ignorée en permanent."
+        },
+        "place": {
+          "name": "Emplacement",
+          "description": "Bandeau du haut ou du bas (pris, ou ajouté le temps de l'affichage), plein écran sur fond flou de la pochette, ou carte dans un coin."
+        },
+        "wake": {
+          "name": "Réveiller l'écran",
+          "description": "Activé : un écran en veille se réveille, puis retourne en veille quand l'affichage est retiré. Désactivé : un écran en veille n'affiche rien."
+        },
+        "corner": {
+          "name": "Coin",
+          "description": "Coin de la carte (emplacement Coin)."
+        },
+        "tag": {
+          "name": "Étiquette",
+          "description": "Un nouveau morceau de même étiquette remplace l'ancien ; « Arrêter l'affichage » avec cette étiquette ne retire que lui. Par défaut : music."
+        }
+      }
+    },
     "clear_display": {
       "name": "Arrêter l'affichage",
       "description": "Retire le message affiché : la diffusion reprend tout de suite. Avec une étiquette, seulement les messages de cette étiquette.",
@@ -396,6 +435,12 @@
         "bottom_left": "Bas gauche",
         "top_right": "Haut droite",
         "top_left": "Haut gauche"
+      }
+    },
+    "display_mode": {
+      "options": {
+        "timed": "Pendant X secondes",
+        "permanent": "Permanent"
       }
     }
   },

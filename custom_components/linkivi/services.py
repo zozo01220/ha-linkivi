@@ -15,6 +15,7 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 from .api import LinkivError
+from .mediaplayer import now_playing
 from .message import read_image, show
 from .const import (
     DOMAIN,
@@ -24,6 +25,8 @@ from .const import (
     SERVICE_CLEAR_DISPLAY,
     SERVICE_END_EMERGENCY,
     SERVICE_SHOW_COUNTDOWN,
+    SERVICE_SHOW_MEDIAPLAYER,
+    MUSIC_TAG,
     SERVICE_SHOW_LIST,
     SERVICE_SHOW_MESSAGE,
     SERVICE_START_EMERGENCY,
@@ -96,6 +99,21 @@ def countdown_data(data: dict) -> dict:
         "more": data.get("others") or 0,
         "ended_message": data.get("ended_message"),
     }
+
+
+# Musique en cours (§351) : le morceau d'un lecteur, pendant X secondes ou en permanence (jusqu'à clear_display)
+SHOW_MEDIAPLAYER_SCHEMA = vol.Schema(
+    {
+        vol.Required("media_player"): cv.entity_id,
+        vol.Optional("display", default="timed"): vol.In(["timed", "permanent"]),
+        vol.Optional("duration", default=15): vol.All(vol.Coerce(int), vol.Range(min=5, max=3600)),
+        vol.Optional("place", default="banner_top"): vol.In(PLACES),
+        vol.Optional("corner", default=CORNERS[0]): vol.In(CORNERS),
+        vol.Optional("wake", default=False): cv.boolean,
+        vol.Optional("tag", default=MUSIC_TAG): vol.All(cv.string, vol.Length(max=40)),
+    },
+    extra=vol.ALLOW_EXTRA,
+)
 
 
 CLEAR_DISPLAY_SCHEMA = vol.Schema({vol.Optional("tag"): vol.All(cv.string, vol.Length(max=40))}, extra=vol.ALLOW_EXTRA)
@@ -204,6 +222,20 @@ async def async_register_services(hass: HomeAssistant) -> None:
 
         await _run(call, send)
 
+    async def show_mediaplayer_playing(call: ServiceCall) -> None:
+        title, music, cover = await now_playing(hass, call.data["media_player"])   # lu une fois, envoyé à chaque écran
+        permanent = call.data.get("display") == "permanent"
+        data = {
+            "title": title, "place": call.data.get("place"), "corner": call.data.get("corner"), "wake": call.data.get("wake"),
+            "tag": (call.data.get("tag") or "").strip() or MUSIC_TAG, "music": music, "permanent": permanent,
+            "duration": None if permanent else call.data.get("duration"),
+        }
+
+        async def send(api, screen_id: str) -> None:
+            await show(hass, api, screen_id, data, cover)
+
+        await _run(call, send)
+
     async def clear_display(call: ServiceCall) -> None:
         tag = (call.data.get("tag") or "").strip() or None   # seulement les messages de cette étiquette (ex. le minuteur, §344)
 
@@ -266,4 +298,5 @@ async def async_register_services(hass: HomeAssistant) -> None:
     hass.services.async_register(DOMAIN, SERVICE_END_EMERGENCY, end_emergency, schema=vol.Schema({}))
     hass.services.async_register(DOMAIN, SERVICE_SHOW_MESSAGE, show_message, schema=SHOW_MESSAGE_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_SHOW_COUNTDOWN, show_countdown, schema=SHOW_COUNTDOWN_SCHEMA)
+    hass.services.async_register(DOMAIN, SERVICE_SHOW_MEDIAPLAYER, show_mediaplayer_playing, schema=SHOW_MEDIAPLAYER_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_CLEAR_DISPLAY, clear_display, schema=CLEAR_DISPLAY_SCHEMA)

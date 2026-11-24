@@ -1,0 +1,139 @@
+blueprint:
+  name: Linkivi – Musique en cours sur les écrans
+  description: >-
+    À chaque nouveau morceau d'un lecteur (Echo, Sonos, Spotify…), la pochette, le titre et l'artiste s'affichent sur les écrans choisis,
+    avec la barre du morceau : pendant quelques secondes, ou en permanence tant que la musique joue (retiré à la pause ou à l'arrêt).
+    Une pause puis une reprise, ou le même morceau relancé, ne réaffichent rien. Un écran sans bandeau en reçoit un le temps de l'affichage.
+    Intégration Linkivi 1.18.0 ou plus (action « Afficher la musique en cours »).
+  domain: automation
+  source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/musique-en-cours.yaml
+  input:
+    players:
+      name: Lecteurs
+      description: Un ou plusieurs lecteurs ; quand deux jouent, le dernier morceau qui commence remplace l'autre.
+      selector:
+        entity:
+          filter:
+            - domain: media_player
+          multiple: true
+    screens:
+      name: Écrans
+      selector:
+        target:
+          entity:
+            integration: linkivi
+    place:
+      name: Emplacement
+      default: banner_top
+      selector:
+        select:
+          options:
+            - label: Bandeau du haut
+              value: banner_top
+            - label: Bandeau du bas
+              value: banner_bottom
+            - label: Plein écran
+              value: full
+            - label: Carte dans un coin
+              value: corner
+    display:
+      name: Affichage
+      description: Permanent : reste tant que la musique joue, retiré à la pause ou à l'arrêt, remplacé au morceau suivant.
+      default: timed
+      selector:
+        select:
+          options:
+            - label: Pendant X secondes
+              value: timed
+            - label: Permanent
+              value: permanent
+    duration:
+      name: Durée d'affichage
+      description: En secondes, à chaque morceau ; ignorée en « Permanent ».
+      default: 15
+      selector:
+        number:
+          min: 5
+          max: 600
+          unit_of_measurement: s
+          mode: box
+    wake:
+      name: Réveiller l'écran
+      description: >-
+        Activé : un écran en veille se réveille pour la musique, puis retourne en veille quand l'affichage est retiré.
+        Désactivé : un écran en veille n'affiche rien.
+      default: false
+      selector:
+        boolean:
+    quiet_from:
+      name: Ne rien afficher à partir de
+      description: Avec « jusqu'à », des heures de silence (par exemple la nuit). Deux heures égales : jamais de silence.
+      default: "00:00:00"
+      selector:
+        time:
+    quiet_to:
+      name: Ne rien afficher jusqu'à
+      default: "00:00:00"
+      selector:
+        time:
+
+mode: queued
+max: 10
+max_exceeded: silent
+
+# « title » : le morceau change ; « state » : lecture, pause, arrêt (sans les changements d'attributs comme la position)
+triggers:
+  - trigger: state
+    id: title
+    entity_id: !input players
+    attribute: media_title
+  - trigger: state
+    id: state
+    entity_id: !input players
+    to: null
+
+variables:
+  display: !input display
+  quiet_from: !input quiet_from
+  quiet_to: !input quiet_to
+  player: "{{ trigger.entity_id }}"
+  permanent: "{{ display == 'permanent' }}"
+  playing: "{{ is_state(player, 'playing') }}"
+  was_playing: "{{ trigger.from_state is not none and trigger.from_state.state == 'playing' }}"
+  title: "{{ state_attr(player, 'media_title') or '' }}"
+  old_title: "{{ (trigger.from_state.attributes.media_title if trigger.from_state is not none else '') or '' }}"
+  quiet: >-
+    {% set t = now().strftime('%H:%M:%S') %}
+    {% if quiet_from == quiet_to %}false
+    {% elif quiet_from < quiet_to %}{{ quiet_from <= t < quiet_to }}
+    {% else %}{{ t >= quiet_from or t < quiet_to }}{% endif %}
+  # nouveau morceau ; en permanent, aussi la reprise du même morceau après une pause (il avait été retiré)
+  show: >-
+    {{ playing and title != '' and not quiet and (
+         (trigger.id == 'title' and title != old_title) or
+         (trigger.id == 'state' and permanent and not was_playing and title == old_title)) }}
+  hide: "{{ trigger.id == 'state' and permanent and was_playing and not playing }}"
+
+conditions:
+  - condition: template
+    value_template: "{{ show or hide }}"
+
+actions:
+  - if: "{{ show }}"
+    then:
+      - action: linkivi.show_mediaplayer_playing
+        continue_on_error: true   # écran hors ligne ou en veille (sans réveil) : on n'arrête pas l'automatisation
+        target: !input screens
+        data:
+          media_player: "{{ player }}"
+          place: !input place
+          display: !input display
+          duration: !input duration
+          wake: !input wake
+          tag: music
+    else:
+      - action: linkivi.clear_display
+        continue_on_error: true
+        target: !input screens
+        data:
+          tag: music

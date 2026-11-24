@@ -336,6 +336,45 @@
         }
       }
     },
+    "show_mediaplayer_playing": {
+      "name": "Show the media playing",
+      "description": "Shows the cover, title and artist of the track playing on a media player (Echo, Sonos…), with the track progress bar. For X seconds, or permanently until « Stop the display ». A screen without a banner gets one for the time of the display.",
+      "sections": {
+        "options": {
+          "name": "Options"
+        }
+      },
+      "fields": {
+        "media_player": {
+          "name": "Media player",
+          "description": "The player whose track is shown; it must be playing."
+        },
+        "display": {
+          "name": "Display",
+          "description": "For X seconds, or permanent: until « Stop the display » (tag music), 12 h at most."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "In seconds, 5 to 3600; ignored when permanent."
+        },
+        "place": {
+          "name": "Placement",
+          "description": "Top or bottom banner (taken, or added for the time of the display), full screen on a blurred cover, or a card in a corner."
+        },
+        "wake": {
+          "name": "Wake the screen",
+          "description": "On: a sleeping screen wakes up, then goes back to sleep when the display is removed. Off: a sleeping screen shows nothing."
+        },
+        "corner": {
+          "name": "Corner",
+          "description": "Corner of the card (Corner placement)."
+        },
+        "tag": {
+          "name": "Tag",
+          "description": "A new track with the same tag replaces the old one; « Stop the display » with this tag removes only it. Default: music."
+        }
+      }
+    },
     "clear_display": {
       "name": "Stop the display",
       "description": "Removes the message: the playlist resumes at once. With a tag, only the messages with that tag.",
@@ -396,6 +435,12 @@
         "bottom_left": "Bottom left",
         "top_right": "Top right",
         "top_left": "Top left"
+      }
+    },
+    "display_mode": {
+      "options": {
+        "timed": "For X seconds",
+        "permanent": "Permanent"
       }
     }
   },

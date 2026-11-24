@@ -99,6 +99,8 @@ async def show(
         paused=bool(data.get("paused")),
         more=int(data.get("more") or 0),
         ended_message=data.get("ended_message"),
+        music=data.get("music"),
+        permanent=bool(data.get("permanent")),
     )
     notice_id = res.get("noticeId")
     if image and notice_id and data.get("live") and data.get("camera"):

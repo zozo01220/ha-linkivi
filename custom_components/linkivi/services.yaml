@@ -148,6 +148,64 @@ show_countdown:
           selector:
             text:
 
+show_mediaplayer_playing:
+  target:
+    entity:
+      integration: linkivi
+  fields:
+    media_player:
+      required: true
+      selector:
+        entity:
+          domain: media_player
+    display:
+      default: timed
+      selector:
+        select:
+          translation_key: display_mode
+          options:
+            - timed
+            - permanent
+    duration:
+      default: 15
+      selector:
+        number:
+          min: 5
+          max: 3600
+          unit_of_measurement: s
+          mode: box
+    place:
+      default: banner_top
+      selector:
+        select:
+          translation_key: place
+          options:
+            - banner_top
+            - banner_bottom
+            - full
+            - corner
+    wake:
+      default: false
+      selector:
+        boolean:
+    options:
+      collapsed: true
+      fields:
+        corner:
+          default: bottom_right
+          selector:
+            select:
+              translation_key: corner
+              options:
+                - bottom_right
+                - bottom_left
+                - top_right
+                - top_left
+        tag:
+          default: music
+          selector:
+            text:
+
 clear_display:
   target:
     entity:

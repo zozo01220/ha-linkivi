@@ -5,10 +5,10 @@ from typing import Any
 
 DOMAIN = "linkivi"
 
-# Carte personnalisée « Écrans Linkivi » (www/linkivi-screens-card.js), publiée sous /linkivi/ et chargée par l'interface.
-CARD_FILE = "linkivi-screens-card.js"
+# Carte personnalisée « Écran Linkivi » (www/linkivi-screen-card.js, §351 : un écran par carte), publiée sous /linkivi/ et chargée par l'interface.
+CARD_FILE = "linkivi-screen-card.js"
 CARD_URL = f"/{DOMAIN}/{CARD_FILE}"
-CARD_VERSION = "2.0.1"
+CARD_VERSION = "3.0.0"
 
 # L'API publique de Linkivi (§154). L'état arrive en direct par le canal temps réel (§299) ;
 # la relecture complète n'est plus qu'un filet de sécurité (toutes les 5 min).
@@ -55,6 +55,8 @@ def hardware(screen: dict[str, Any]) -> str | None:
 # Actions (services.py) : afficher un message sur des écrans, le retirer. Aspects acceptés par POST /screens/{id}/display.
 SERVICE_SHOW_MESSAGE = "show_message"
 SERVICE_SHOW_COUNTDOWN = "show_countdown"
+SERVICE_SHOW_MEDIAPLAYER = "show_mediaplayer_playing"
+MUSIC_TAG = "music"   # étiquette par défaut de la musique en cours (§351) : le morceau suivant remplace le précédent
 SERVICE_CLEAR_DISPLAY = "clear_display"
 SERVICE_SHOW_LIST = "show_list"
 SERVICE_START_EMERGENCY = "start_emergency"
