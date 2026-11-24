@@ -1,11 +1,11 @@
-"""État d'un écran et dernière connexion (§301), en capteurs à part (avant : attributs de « En ligne »)."""
+"""État d'un écran et dernière connexion (§301), en capteurs à part (avant : attributs de « En ligne ») ; dernier démarrage et version du player (§349)."""
 
 from __future__ import annotations
 
 from datetime import datetime
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
-from homeassistant.const import PERCENTAGE
+from homeassistant.const import PERCENTAGE, EntityCategory
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -19,7 +19,7 @@ STATES = ["online", "offline", "updating", "asleep", "paused"]
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator = entry.runtime_data
     entry.async_on_unload(
-        add_new_screens(coordinator, async_add_entities, lambda sid, s: [LinkivStateSensor(coordinator, sid), LinkivLastSeenSensor(coordinator, sid)] + ([LinkivBatterySensor(coordinator, sid)] if s.get("battery") else []))
+        add_new_screens(coordinator, async_add_entities, lambda sid, s: [LinkivStateSensor(coordinator, sid), LinkivLastSeenSensor(coordinator, sid), LinkivBootSensor(coordinator, sid), LinkivVersionSensor(coordinator, sid)] + ([LinkivBatterySensor(coordinator, sid)] if s.get("battery") else []))
     )
 
 
@@ -77,3 +77,37 @@ class LinkivBatterySensor(LinkivEntity, SensorEntity):
     def native_value(self) -> int | None:
         b = self.screen.get("battery")
         return b.get("level") if b else None
+
+
+class LinkivBootSensor(LinkivEntity, SensorEntity):
+    """Dernier démarrage de l'appareil (§349), tel que le player l'a remonté : un redémarrage inattendu se voit ici."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_translation_key = "booted_at"
+
+    def __init__(self, coordinator, screen_id: str) -> None:
+        super().__init__(coordinator, screen_id, "booted_at")
+
+    @property
+    def native_value(self) -> datetime | None:
+        raw = self.screen.get("bootedAt")
+        return dt_util.parse_datetime(raw) if raw else None
+
+
+class LinkivVersionSensor(LinkivEntity, SensorEntity):
+    """Version de l'application Linkivi Player (§349) ; aussi sur la fiche de l'appareil (« Micrologiciel »). Attributs : système et modèle."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_translation_key = "player_version"
+
+    def __init__(self, coordinator, screen_id: str) -> None:
+        super().__init__(coordinator, screen_id, "player_version")
+
+    @property
+    def native_value(self) -> str | None:
+        return self.screen.get("playerVersion")
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str]:
+        return {k: v for k, v in (("os", self.screen.get("os")), ("model", self.screen.get("model"))) if v}

@@ -1,6 +1,7 @@
 """Constantes de l'intégration Linkivi."""
 
 from datetime import timedelta
+from typing import Any
 
 DOMAIN = "linkivi"
 
@@ -44,6 +45,12 @@ DEVICE_LABELS = {
     "androidtv": "Player Android TV",
     "web": "Player navigateur",
 }
+
+
+def hardware(screen: dict[str, Any]) -> str | None:
+    """Matériel de la fiche de l'appareil (§349) : modèle et système remontés par le player (« Raspberry Pi 4 Model B · Raspberry Pi OS 12 »)."""
+    return " · ".join(v for v in (screen.get("model"), screen.get("os")) if v) or None
+
 
 # Actions (services.py) : afficher un message sur des écrans, le retirer. Aspects acceptés par POST /screens/{id}/display.
 SERVICE_SHOW_MESSAGE = "show_message"

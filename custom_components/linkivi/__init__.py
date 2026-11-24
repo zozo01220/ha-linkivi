@@ -19,7 +19,7 @@ from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import LinkivApi, LinkivAuthError, LinkivError
-from .const import CARD_FILE, CARD_URL, CARD_VERSION, CONF_SCREENS, CONF_SEEN, DEVICE_LABELS, DISCOVERY_PREFIX, DOMAIN, OPT_AUTO_ADD, SCAN_INTERVAL
+from .const import CARD_FILE, CARD_URL, CARD_VERSION, CONF_SCREENS, CONF_SEEN, DEVICE_LABELS, DISCOVERY_PREFIX, DOMAIN, OPT_AUTO_ADD, SCAN_INTERVAL, hardware
 from .services import async_register_services
 from .share import OPT_AREAS, OPT_COMMANDS, OPT_ENTITIES, OPT_LABELS, LinkivShare
 from .stream import LinkivStream
@@ -78,7 +78,21 @@ class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             if new:
                 self._save(self.tracked | new if self.auto_add else self.tracked, self.seen | new)
         self._announce()
-        return {k: v for k, v in screens.items() if k in (self.tracked or set())}
+        tracked = {k: v for k, v in screens.items() if k in (self.tracked or set())}
+        self._sync_devices(tracked)
+        return tracked
+
+    @callback
+    def _sync_devices(self, screens: dict[str, dict[str, Any]]) -> None:
+        """Fiche de l'appareil (§349) : version du player, modèle et système suivent ce que Linkivi a reçu du player (mise à jour, changement de boîtier)."""
+        device_reg = dr.async_get(self.hass)
+        for sid, screen in screens.items():
+            device = device_reg.async_get_device(identifiers={(DOMAIN, sid)})
+            if device is None:
+                continue   # appareil pas encore créé : ses entités le créeront avec ces valeurs
+            hw, sw = hardware(screen), screen.get("playerVersion")
+            if (hw and hw != device.hw_version) or (sw and sw != device.sw_version):
+                device_reg.async_update_device(device.id, hw_version=hw or device.hw_version, sw_version=sw or device.sw_version)
 
     @callback
     def publish(self, screens: dict[str, dict[str, Any]]) -> None:
@@ -126,6 +140,8 @@ class LinkivCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             name=screen.get("name") or "Écran",
             manufacturer="Linkivi",
             model=DEVICE_LABELS.get(screen.get("device"), "Écran"),
+            hw_version=hardware(screen),
+            sw_version=screen.get("playerVersion"),
             configuration_url=self.api.base_url,
         )
         if area_id:

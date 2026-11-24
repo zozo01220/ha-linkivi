@@ -1,6 +1,6 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.15.3-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.16.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
 Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Neuf blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités, minuteur Alexa), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
@@ -52,9 +52,13 @@ Si Linkivi retire l'accès (clé révoquée ou expirée), Home Assistant demande
 | **Liste diffusée** | liste de choix | La liste de lecture de l'écran. En choisir une autre la publie aussitôt, sans approbation. Pas pour un écran de mur ni une borne. |
 | **État** | capteur | En ligne, hors ligne, mise à jour, en veille ou en pause. |
 | **Dernière connexion** | capteur (désactivé par défaut) | Dernier contact de l'écran. |
+| **Dernier démarrage** | capteur (diagnostic) | Dernier démarrage de l'appareil, remonté par le player : un redémarrage inattendu se voit ici. |
+| **Version du player** | capteur (diagnostic) | Version de Linkivi Player. Attributs : système et modèle de l'appareil. |
 | **Aperçu du direct** | caméra | Ce que l'écran affiche (players Android et Raspberry Pi). Une nouvelle image est demandée au plus toutes les 60 s quand on la regarde. Un écran portrait peut arriver couché. |
 | **Message** | notification | Pour l'action `notify.send_message` : une carte en coin (bas droite, 15 s), la diffusion continue. |
 | **Batterie** et **En charge** | capteur, capteur binaire | Smartphones et tablettes Android seulement : niveau et branché ou non. |
+
+La fiche de l'appareil (Paramètres › Appareils) montre aussi le **matériel** (modèle et système, par exemple « Raspberry Pi 4 Model B · Raspberry Pi OS 12 ») et le **micrologiciel** (version du player) ; elle suit les mises à jour du player. Un écran jamais contacté par son player n'a encore ni l'un ni l'autre.
 
 
 Et pour l'organisation (appareil « Organisation ») :
@@ -264,6 +268,7 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
+| **1.16.0** | **Santé de l'appareil** : capteurs **Dernier démarrage** et **Version du player** (diagnostic), matériel et micrologiciel sur la fiche de l'appareil, tenus à jour. Demande Linkivi du 24 nov. 2026 ou plus récent (sinon ces valeurs restent vides). |
 | **1.15.3** | Bouton **Réveiller** sur chaque écran (réveil d'une heure, comme l'interrupteur « Écran » allumé). |
 | **1.15.2** | Bouton **Mettre en veille** sur chaque écran (veille jusqu'au réveil, comme l'interrupteur « Écran » éteint). |
 | **1.15.1** | Correctif : la 1.15.0 ne se chargeait pas (« cannot import name SERVICE_SHOW_COUNTDOWN »). |

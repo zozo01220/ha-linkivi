@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import LinkivCoordinator
-from .const import DEVICE_LABELS, DOMAIN
+from .const import DEVICE_LABELS, DOMAIN, hardware
 
 
 class LinkivEntity(CoordinatorEntity[LinkivCoordinator]):
@@ -29,6 +29,8 @@ class LinkivEntity(CoordinatorEntity[LinkivCoordinator]):
             name=screen.get("name", "Écran"),
             manufacturer="Linkivi",
             model=DEVICE_LABELS.get(screen.get("device"), "Écran"),
+            hw_version=hardware(screen),
+            sw_version=screen.get("playerVersion"),
             configuration_url=coordinator.api.base_url,
         )
 

@@ -161,6 +161,20 @@
       },
       "last_seen": {
         "name": "Dernière connexion"
+      },
+      "booted_at": {
+        "name": "Dernier démarrage"
+      },
+      "player_version": {
+        "name": "Version du player",
+        "state_attributes": {
+          "os": {
+            "name": "Système"
+          },
+          "model": {
+            "name": "Modèle"
+          }
+        }
       }
     },
     "camera": {

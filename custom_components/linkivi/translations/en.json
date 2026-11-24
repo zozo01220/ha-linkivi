@@ -161,6 +161,20 @@
       },
       "last_seen": {
         "name": "Last seen"
+      },
+      "booted_at": {
+        "name": "Last boot"
+      },
+      "player_version": {
+        "name": "Player version",
+        "state_attributes": {
+          "os": {
+            "name": "System"
+          },
+          "model": {
+            "name": "Model"
+          }
+        }
       }
     },
     "camera": {
