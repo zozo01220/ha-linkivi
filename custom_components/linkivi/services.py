@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 
 import voluptuous as vol
@@ -121,14 +122,24 @@ def _has_target(call: ServiceCall) -> bool:
 
 async def _run(call: ServiceCall, send) -> None:
     """Envoie à chaque écran ; une erreur d'un écran n'empêche pas les autres, et toutes sont rapportées ensemble."""
-    failures: list[str] = []
     targets = await _screens_of(call.hass, call)
-    for coordinator, screen_id in targets:
+
+    async def one(coordinator, screen_id: str) -> str | None:
         name = coordinator.data.get(screen_id, {}).get("name", screen_id)
         try:
             await send(coordinator.api, screen_id)
         except LinkivError as err:
-            failures.append(f"{name} : {err}")
+            return f"{name} : {err}"
+        return None
+
+    # tous les écrans en même temps : un minuteur qui s'arrête ne doit pas attendre les allers-retours de chaque écran, l'un après l'autre
+    results = await asyncio.gather(*(one(c, s) for c, s in targets), return_exceptions=True)
+    failures: list[str] = []
+    for res in results:
+        if isinstance(res, BaseException):
+            raise res
+        if res:
+            failures.append(res)
     if failures:
         raise HomeAssistantError("\n".join(failures))
 

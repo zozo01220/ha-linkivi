@@ -1,6 +1,6 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.14.0-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.14.1-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
 Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Neuf blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités, minuteur Alexa), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
@@ -259,6 +259,7 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
+| **1.14.1** | Les actions « Afficher un message » et « Arrêter l'affichage » s'envoient à tous les écrans **en même temps** (avant : l'un après l'autre, donc un minuteur sur plusieurs écrans s'arrêtait avec du retard). |
 | **1.14.0** | **Minuteur Alexa : où l'afficher.** « Afficher un message » gagne la place **Bandeau du bas** (`banner_bottom`) ; avec `countdown_to`, la place **Plein écran** (`full`) montre le compte à rebours en gros sur fond noir. Le blueprint « Minuteur Alexa sur les écrans » propose : bandeau du haut, bandeau du bas ou plein écran, et l'option « plein écran à la sonnerie seulement ». |
 | **1.13.0** | **Minuteur Alexa** dans le bandeau du haut des écrans : blueprint « Minuteur Alexa sur les écrans » (Alexa Media Player). « Afficher un message » gagne la place **Bandeau du haut** et le **compte à rebours** (`countdown_to`, `paused`, `more`, `ended_message`) ; « Arrêter l'affichage » peut ne retirer qu'une **étiquette**. |
 | 1.12.0 | **Nouveaux écrans dans les Découvertes** : un écran ajouté dans Linkivi est proposé dans Paramètres › Appareils et services › Découvertes, avec le choix de sa pièce. Option « Ajouter automatiquement les nouveaux écrans » pour garder l'ajout tout seul. |
