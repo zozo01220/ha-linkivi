@@ -12,12 +12,46 @@ git subtree split --prefix=homeassistant -b ha-linkivi-public
 git push https://github.com/zozo01220/ha-linkivi.git ha-linkivi-public:main
 ```
 
-Les publications suivantes : les deux mêmes commandes (la branche est refaite à chaque fois).
+Les publications suivantes : voir « Publier une nouvelle version » ci-dessous.
+
+## Publier une nouvelle version (à la main, pas à pas)
+
+Le dépôt public n'est **pas** mis à jour par le push vers `main` : on le publie soi-même, dans cet ordre. Si l'étape 2 est oubliée, le push renvoie l'ancien contenu et la release pointe sur l'ancienne version (arrivé avec la 1.14.0).
+
+1. **Tout commiter et pousser** dans le dépôt privé (la version est dans `custom_components/linkivi/manifest.json`, la ligne de `README.md` aussi).
+2. **Se placer dans le dépôt**, jamais dans `C:WindowsSystem32` (PowerShell s'ouvre parfois là : Git répond « dubious ownership », ne pas ajouter d'exception `safe.directory`) :
+
+```powershell
+cd C:DEVEn-coursLinkii
+```
+
+3. **Refaire la branche** à partir du dossier `homeassistant/` (si Git dit que la branche existe déjà, la supprimer d'abord avec `git branch -D ha-linkivi-public`) :
+
+```powershell
+git subtree split --prefix=homeassistant -b ha-linkivi-public
+```
+
+4. **Vérifier** que la branche porte la bonne version :
+
+```powershell
+git show ha-linkivi-public:custom_components/linkivi/manifest.json | Select-String version
+```
+
+5. **Pousser** vers le dépôt public :
+
+```powershell
+git push https://github.com/zozo01220/ha-linkivi.git ha-linkivi-public:main
+```
+
+6. **Créer la release** sur github.com/zozo01220/ha-linkivi (voir ci-dessous), puis, dans Home Assistant : HACS › Linkivi › Mettre à jour, redémarrer.
+7. **Blueprint** : si `blueprints/` a changé, le ré-importer dans Home Assistant (Paramètres › Automatisations › Blueprints).
+
+Vérifier que le dépôt public a bien reçu la version : `git ls-remote https://github.com/zozo01220/ha-linkivi.git` doit montrer, pour `refs/heads/main`, le même numéro de commit que `git rev-parse ha-linkivi-public`.
 
 ## 2. Publier une version
 
 1. Mettre `version` à jour dans `custom_components/linkivi/manifest.json` (ex. `1.5.0`).
-2. Dans le dépôt public : **Releases › Draft a new release**, étiquette `v1.5.0`, notes de version. **Indispensable** : HACS propose la dernière *Release*, pas la dernière étiquette ; une étiquette seule n'apparaît pas dans Home Assistant.
+2. Dans le dépôt public : **Releases › Draft a new release**, étiquette `v1.5.0` créée sur `main` **après** le push de l'étape 5 (étiquette et release se refont si elles ont été créées trop tôt : les supprimer, puis recréer), notes de version. **Indispensable** : HACS propose la dernière *Release*, pas la dernière étiquette ; une étiquette seule n'apparaît pas dans Home Assistant.
 3. Les contrôles **hassfest** et **HACS** tournent tout seuls (`.github/workflows/validate.yml`) : ils doivent être verts.
 
 ## 3. Installer par HACS (chez un utilisateur)
