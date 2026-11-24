@@ -3,7 +3,7 @@ blueprint:
   description: >-
     « Alexa, mets un minuteur de 10 minutes » : le minuteur s'affiche sur les écrans choisis, au choix dans le bandeau du haut, le bandeau du bas (pris, ou ajouté
     le temps du minuteur) ou en plein écran sur fond noir, compte jusqu'à zéro, clignote en rouge pendant qu'Alexa sonne, puis disparaît au « Alexa, stop ».
-    Demande l'intégration Alexa Media Player (capteur « Prochain minuteur » de l'Alexa). Une automatisation par Alexa.
+    Demande l'intégration Alexa Media Player (capteur « Prochain minuteur » de l'Alexa). Une automatisation par Alexa. Intégration Linkivi 1.15.0 ou plus (action « Afficher un compte à rebours »).
   domain: automation
   source_url: https://github.com/zozo01220/ha-linkivi/blob/main/blueprints/automation/linkivi/minuteur-alexa.yaml
   input:
@@ -106,16 +106,16 @@ actions:
               label: "{{ (first.label | default('')) or '' }}"
               more: "{{ [(active | count) - 1, 0] | max }}"
               second: "{{ (active[1].label | default('')) if (active | count) > 1 else '' }}"
-          - action: linkivi.show_message
+          - action: linkivi.show_countdown
             continue_on_error: true   # écran hors ligne ou en veille : on n'arrête pas l'automatisation
             target: !input screens
             data:
               title: "{{ label | capitalize if label else 'Minuteur' }}"
               message: "{{ ('puis ' ~ second) if second else alexa_name }}"
               place: !input place
-              countdown_to: "{{ end }}"
+              ends_at: "{{ end }}"
               paused: "{{ paused }}"
-              more: "{{ more }}"
+              others: "{{ more }}"
               ended_message: !input ended
               tag: minuteur-alexa
           # « plein écran à la sonnerie » : on attend la fin du minuteur, puis le même message passe en plein écran (rouge clignotant)
@@ -123,15 +123,15 @@ actions:
             then:
               - delay:
                   seconds: "{{ [(as_datetime(end) - now()).total_seconds(), 0] | max | int }}"
-              - action: linkivi.show_message
+              - action: linkivi.show_countdown
                 continue_on_error: true
                 target: !input screens
                 data:
                   title: "{{ label | capitalize if label else 'Minuteur' }}"
                   message: "{{ alexa_name }}"
                   place: full
-                  countdown_to: "{{ end }}"
-                  more: "{{ more }}"
+                  ends_at: "{{ end }}"
+                  others: "{{ more }}"
                   ended_message: !input ended
                   tag: minuteur-alexa
     default:
@@ -144,14 +144,14 @@ actions:
         then:
           - if: "{{ ring_full and place != 'full' }}"
             then:
-              - action: linkivi.show_message
+              - action: linkivi.show_countdown
                 continue_on_error: true
                 target: !input screens
                 data:
                   title: Minuteur
                   message: "{{ alexa_name }}"
                   place: full
-                  countdown_to: "{{ trigger.from_state.state }}"
+                  ends_at: "{{ trigger.from_state.state }}"
                   ended_message: !input ended
                   tag: minuteur-alexa
           - delay: !input keep

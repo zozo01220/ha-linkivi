@@ -223,22 +223,68 @@
         "tag": {
           "name": "Tag",
           "description": "A new corner card with the same tag replaces the old one instead of stacking (e.g. doorbell)."
+        }
+      },
+      "sections": {
+        "appearance": {
+          "name": "Appearance"
         },
-        "countdown_to": {
-          "name": "Countdown to",
-          "description": "End time of a countdown (e.g. an Alexa timer): the screen shows the time left, then blinks red with the time elapsed once it is over. The message then stays until « Stop the display » (one hour after the end at most); the duration is ignored."
+        "picture": {
+          "name": "Image or camera"
+        },
+        "advanced": {
+          "name": "Advanced"
+        }
+      }
+    },
+    "show_countdown": {
+      "name": "Show a countdown",
+      "description": "Shows the time left until an end time (timer, washing machine…), then flashes red with the elapsed time. Stays on screen until « Stop the display » (at most one hour after the end).",
+      "sections": {
+        "options": {
+          "name": "Options"
+        }
+      },
+      "fields": {
+        "ends_at": {
+          "name": "End time",
+          "description": "When the countdown reaches zero (within 24 h)."
+        },
+        "title": {
+          "name": "Title",
+          "description": "Up to 60 characters. Empty: « Timer »."
+        },
+        "message": {
+          "name": "Message",
+          "description": "Below the title (e.g. the device that rings)."
         },
         "paused": {
           "name": "Paused",
-          "description": "The countdown is paused: the digits stay still (countdown_to = now + time left)."
+          "description": "Frozen digits: the end time is then now + the time left."
         },
-        "more": {
-          "name": "Other countdowns",
-          "description": "Number of other countdowns running: a « +1 » badge."
+        "place": {
+          "name": "Placement",
+          "description": "Top banner (default) or bottom banner, full screen on black, or a card in a corner."
+        },
+        "corner": {
+          "name": "Corner",
+          "description": "Corner of the card (Corner placement)."
         },
         "ended_message": {
-          "name": "Text once over",
-          "description": "Shown under the title once the countdown is over (e.g. « say Alexa, stop »)."
+          "name": "Text once finished",
+          "description": "Shown below the title at zero (e.g. « say Alexa, stop »)."
+        },
+        "others": {
+          "name": "Other timers",
+          "description": "Number of other countdowns running: a « +1 » badge."
+        },
+        "wake": {
+          "name": "Wake the screen",
+          "description": "Wakes a screen in standby (otherwise a sleeping screen refuses)."
+        },
+        "tag": {
+          "name": "Tag",
+          "description": "A new countdown with the same tag replaces the old one; « Stop the display » with this tag removes only it. Default: countdown."
         }
       }
     },
@@ -248,7 +294,7 @@
       "fields": {
         "tag": {
           "name": "Tag",
-          "description": "Only removes the messages with this tag (e.g. minuteur-alexa); empty: all of them."
+          "description": "Only removes messages with this tag (e.g. countdown for a countdown); empty: all."
         }
       }
     },

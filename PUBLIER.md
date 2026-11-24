@@ -12,41 +12,77 @@ git subtree split --prefix=homeassistant -b ha-linkivi-public
 git push https://github.com/zozo01220/ha-linkivi.git ha-linkivi-public:main
 ```
 
-Les publications suivantes : voir « Publier une nouvelle version » ci-dessous.
+Les publications suivantes : voir « Publier une nouvelle version » ci-dessous (script).
 
-## Publier une nouvelle version (à la main, pas à pas)
+## Publier une nouvelle version : le script `deploy/publier-ha.ps1`
 
-Le dépôt public n'est **pas** mis à jour par le push vers `main` : on le publie soi-même, dans cet ordre. Si l'étape 2 est oubliée, le push renvoie l'ancien contenu et la release pointe sur l'ancienne version (arrivé avec la 1.14.0).
+Le dépôt public n'est **pas** mis à jour par le push vers `main` : on le publie avec le script. Il remplace `git subtree split`, qui relit les 500 commits du dépôt privé et prend plusieurs minutes ; le script copie simplement le dossier et prend quelques secondes.
 
-1. **Tout commiter et pousser** dans le dépôt privé (la version est dans `custom_components/linkivi/manifest.json`, la ligne de `README.md` aussi).
-2. **Se placer dans le dépôt**, jamais dans `C:WindowsSystem32` (PowerShell s'ouvre parfois là : Git répond « dubious ownership », ne pas ajouter d'exception `safe.directory`) :
+### Utilisation
+
+1. **Mettre la version à jour** dans `custom_components/linkivi/manifest.json` (et la ligne de `README.md`), puis **commiter** : le script refuse de publier si `homeassistant/` a des changements non commités.
+2. **Ouvrir PowerShell** et se placer dans le dépôt, jamais dans `C:WindowsSystem32` (PowerShell s'ouvre parfois là : Git répond « dubious ownership », ne pas ajouter d'exception `safe.directory`) :
 
 ```powershell
 cd C:DEVEn-coursLinkii
 ```
 
-3. **Refaire la branche** à partir du dossier `homeassistant/` (si Git dit que la branche existe déjà, la supprimer d'abord avec `git branch -D ha-linkivi-public`) :
+3. **Voir d'abord ce qui sera publié**, sans rien envoyer :
 
 ```powershell
+.deploypublier-ha.ps1 -DryRun
+```
+
+4. **Publier** (le script demande « o » pour confirmer avant d'envoyer) :
+
+```powershell
+.deploypublier-ha.ps1
+```
+
+5. **Créer la release** : à la main (le script donne l'adresse), ou en une fois avec la commande `gh` (GitHub CLI, à installer et connecter une fois avec `gh auth login`) :
+
+```powershell
+.deploypublier-ha.ps1 -Release -Notes "Ce qui change dans cette version"
+```
+
+6. **Dans Home Assistant** : HACS › Linkivi › menu ⋮ › Mettre à jour les informations › Télécharger › redémarrer. Si `blueprints/` a changé, ré-importer le blueprint (Paramètres › Automatisations › Blueprints).
+
+Si PowerShell refuse d'exécuter le script (« l'exécution de scripts est désactivée ») : `powershell -ExecutionPolicy Bypass -File .deploypublier-ha.ps1`.
+
+### Options
+
+| Option | Effet |
+|---|---|
+| `-DryRun` | va jusqu'à la copie et liste les fichiers qui changeraient ; ni commit ni push |
+| `-Version 1.14.2` | garde-fou : le script s'arrête si le manifeste ne dit pas exactement cette version |
+| `-Release` | crée aussi la release `vX.Y.Z` avec `gh` |
+| `-Notes "…"` | texte de la release (défaut : « Linkivi X.Y.Z ») |
+| `-Yes` | ne demande pas confirmation |
+| `-PublicDir "D:…"` | autre dossier pour le clone du dépôt public (défaut : `C:DEVha-linkivi-public`) |
+
+### Ce que fait le script, étape par étape
+
+1. **Version** : lit `version` dans `manifest.json` (ce sera l'étiquette `vX.Y.Z`) ; s'arrête si `-Version` est donnée et différente.
+2. **Dépôt privé propre** : vérifie que `homeassistant/` n'a aucun changement non commité.
+3. **Clone du dépôt public** : au premier lancement, clone `zozo01220/ha-linkivi` dans `C:DEVha-linkivi-public` ; ensuite, le remet exactement sur `origin/main` (`fetch` puis `reset --hard`). Ce clone est un miroir : ne jamais y travailler à la main, tout y est écrasé. Prévient si l'étiquette existe déjà.
+4. **Copie** : `robocopy /MIR` rend le clone identique à `homeassistant/` (fichiers supprimés compris) ; `.git`, `__pycache__` et `*.pyc` sont ignorés.
+5. **Changements** : `git add -A` puis liste des fichiers modifiés. S'il n'y en a aucun, le dépôt public est déjà à jour et le script s'arrête. Il vérifie aussi que le manifeste copié porte bien la version attendue. Avec `-DryRun`, il s'arrête ici.
+6. **Commit et push** : demande confirmation, commit « Linkivi X.Y.Z » et push vers `main` du dépôt public.
+7. **Vérification** : compare le commit de `main` chez GitHub (`git ls-remote`) à celui du clone ; s'ils diffèrent, erreur.
+8. **Release** : avec `-Release` et `gh`, crée la release `vX.Y.Z` sur `main` ; sinon affiche l'adresse pour la créer. **Une étiquette seule ne suffit pas** : HACS ne propose que les *releases*, et la release doit être créée **après** le push (sinon elle pointe sur l'ancien contenu).
+
+Le script n'écrit jamais dans le dépôt privé et ne force jamais le push.
+
+### Ancienne méthode (si le script ne peut pas servir)
+
+```powershell
+cd C:DEVEn-coursLinkii
+git branch -D ha-linkivi-public
 git subtree split --prefix=homeassistant -b ha-linkivi-public
-```
-
-4. **Vérifier** que la branche porte la bonne version :
-
-```powershell
-git show ha-linkivi-public:custom_components/linkivi/manifest.json | Select-String version
-```
-
-5. **Pousser** vers le dépôt public :
-
-```powershell
 git push https://github.com/zozo01220/ha-linkivi.git ha-linkivi-public:main
 ```
 
-6. **Créer la release** sur github.com/zozo01220/ha-linkivi (voir ci-dessous), puis, dans Home Assistant : HACS › Linkivi › Mettre à jour, redémarrer.
-7. **Blueprint** : si `blueprints/` a changé, le ré-importer dans Home Assistant (Paramètres › Automatisations › Blueprints).
-
-Vérifier que le dépôt public a bien reçu la version : `git ls-remote https://github.com/zozo01220/ha-linkivi.git` doit montrer, pour `refs/heads/main`, le même numéro de commit que `git rev-parse ha-linkivi-public`.
+Lente (tout l'historique est relu), puis release à créer à la main.
 
 ## 2. Publier une version
 

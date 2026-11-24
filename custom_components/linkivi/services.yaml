@@ -12,86 +12,141 @@ show_message:
       selector:
         text:
           multiline: true
-    look:
-      default: information
-      selector:
-        select:
-          translation_key: look
-          options:
-            - information
-            - attention
-    blur:
-      default: false
-      selector:
-        boolean:
-    duration:
-      example: 30
-      selector:
-        number:
-          min: 5
-          max: 3600
-          unit_of_measurement: s
-          mode: box
-    wake:
-      default: false
-      selector:
-        boolean:
-    place:
-      default: full
-      selector:
-        select:
-          translation_key: place
-          options:
-            - full
-            - banner_top
-            - banner_bottom
-            - corner
-    corner:
-      default: bottom_right
-      selector:
-        select:
-          translation_key: corner
-          options:
-            - bottom_right
-            - bottom_left
-            - top_right
-            - top_left
-    camera:
-      selector:
-        entity:
-          domain: camera
-    image_url:
-      example: "https://example.com/image.jpg"
-      selector:
-        text:
-          type: url
-    live:
-      default: false
-      selector:
-        boolean:
-    tag:
-      example: "doorbell"
-      selector:
-        text:
-    countdown_to:
+    appearance:
+      collapsed: true
+      fields:
+        place:
+          default: full
+          selector:
+            select:
+              translation_key: place
+              options:
+                - full
+                - banner_top
+                - banner_bottom
+                - corner
+        corner:
+          default: bottom_right
+          selector:
+            select:
+              translation_key: corner
+              options:
+                - bottom_right
+                - bottom_left
+                - top_right
+                - top_left
+        look:
+          default: information
+          selector:
+            select:
+              translation_key: look
+              options:
+                - information
+                - attention
+        blur:
+          default: false
+          selector:
+            boolean:
+    picture:
+      collapsed: true
+      fields:
+        camera:
+          selector:
+            entity:
+              domain: camera
+        image_url:
+          example: "https://example.com/image.jpg"
+          selector:
+            text:
+              type: url
+        live:
+          default: false
+          selector:
+            boolean:
+    advanced:
+      collapsed: true
+      fields:
+        duration:
+          example: 30
+          selector:
+            number:
+              min: 5
+              max: 3600
+              unit_of_measurement: s
+              mode: box
+        wake:
+          default: false
+          selector:
+            boolean:
+        tag:
+          example: "doorbell"
+          selector:
+            text:
+
+show_countdown:
+  target:
+    entity:
+      integration: linkivi
+  fields:
+    ends_at:
+      required: true
       example: "2026-11-23 19:10:42"
       selector:
         datetime:
+    title:
+      example: "Minuteur pâtes"
+      selector:
+        text:
+    message:
+      example: "Alexa de la cuisine"
+      selector:
+        text:
     paused:
       default: false
       selector:
         boolean:
-    more:
-      default: 0
-      selector:
-        number:
-          min: 0
-          max: 9
-          mode: box
-    ended_message:
-      example: "dites « Alexa, stop »"
-      selector:
-        text:
+    options:
+      collapsed: true
+      fields:
+        place:
+          default: banner_top
+          selector:
+            select:
+              translation_key: place
+              options:
+                - banner_top
+                - banner_bottom
+                - full
+                - corner
+        corner:
+          default: bottom_right
+          selector:
+            select:
+              translation_key: corner
+              options:
+                - bottom_right
+                - bottom_left
+                - top_right
+                - top_left
+        ended_message:
+          example: "dites « Alexa, stop »"
+          selector:
+            text:
+        others:
+          default: 0
+          selector:
+            number:
+              min: 0
+              max: 9
+              mode: box
+        wake:
+          default: false
+          selector:
+            boolean:
+        tag:
+          default: countdown
+          selector:
+            text:
 
 clear_display:
   target:

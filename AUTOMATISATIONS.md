@@ -355,24 +355,24 @@ actions:
         data:
           tag: minuteur-alexa
     else:
-      - action: linkivi.show_message
+      - action: linkivi.show_countdown
         target:
           area_id: sejour
         data:
           title: Minuteur
           message: Alexa du séjour
           place: banner_top
-          countdown_to: "{{ states('sensor.sejour_alexa_prochain_minuteur') }}"
+          ends_at: "{{ states('sensor.sejour_alexa_prochain_minuteur') }}"
           ended_message: dites « Alexa, stop »
           tag: minuteur-alexa
 ```
 
 Le blueprint fait la même chose en plus complet : nom donné au minuteur (« minuteur pâtes »), pause, « +1 » quand il y en a plusieurs, rien de renvoyé quand seule l'heure du relevé change, et rouge gardé un moment si Alexa Media Player retire le minuteur dès qu'il sonne.
 
-**Les champs de « Afficher un message » qui servent ici** (utilisables pour tout compte à rebours : minuteur Home Assistant, fin d'un lave-linge…)
+**Les champs de « Afficher un compte à rebours »** (1.15.0, utilisables pour tout compte à rebours : minuteur Home Assistant, fin d'un lave-linge…)
 - `place: banner_top` ou `banner_bottom` : le bandeau du haut ou du bas, pris ou ajouté le temps du message ; `place: full` : plein écran sur fond noir (gros chiffres), le contenu est masqué pendant le minuteur ;
-- `countdown_to` : l'heure de fin ; l'écran compte seul, puis clignote en rouge avec le temps écoulé ; le message reste jusqu'à « Arrêter l'affichage » (au plus une heure après la fin) et la durée est ignorée ;
-- `paused` : chiffres figés (`countdown_to` = maintenant + temps restant) ; `more` : pastille « +1 » ; `ended_message` : le texte une fois fini ;
+- `ends_at` : l'heure de fin ; l'écran compte seul, puis clignote en rouge avec le temps écoulé ; le compte à rebours reste jusqu'à « Arrêter l'affichage » (au plus une heure après la fin) ;
+- `paused` : chiffres figés (`ends_at` = maintenant + temps restant) ; `others` : pastille « +1 » ; `ended_message` : le texte une fois fini ;
 - « Arrêter l'affichage » avec `tag` : ne retire que les messages de cette étiquette (une sonnette affichée en même temps reste).
 
 Un autre message « en bandeau » arrivé pendant le minuteur passe devant ; le minuteur revient à sa fin.

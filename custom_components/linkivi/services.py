@@ -23,6 +23,7 @@ from .const import (
     PLACES,
     SERVICE_CLEAR_DISPLAY,
     SERVICE_END_EMERGENCY,
+    SERVICE_SHOW_COUNTDOWN,
     SERVICE_SHOW_LIST,
     SERVICE_SHOW_MESSAGE,
     SERVICE_START_EMERGENCY,
@@ -47,7 +48,8 @@ SHOW_MESSAGE_SCHEMA = vol.All(
             vol.Optional("image_url"): cv.url,
             vol.Optional("live", default=False): cv.boolean,
             vol.Optional("tag"): vol.All(cv.string, vol.Length(max=40)),
-            # compte à rebours (§344, minuteur Alexa) : temps restant, puis rouge clignotant à zéro, jusqu'à clear_display
+            # compte à rebours (§344) : toujours accepté ici pour les automatisations d'avant la 1.15, mais masqué dans l'éditeur ;
+            # l'action show_countdown (§347) le remplace
             vol.Optional("countdown_to"): cv.datetime,
             vol.Optional("paused", default=False): cv.boolean,
             vol.Optional("more", default=0): vol.All(vol.Coerce(int), vol.Range(min=0, max=9)),
@@ -57,6 +59,44 @@ SHOW_MESSAGE_SCHEMA = vol.All(
     ),
     cv.has_at_least_one_key("title", "message"),
 )
+
+# Compte à rebours (§347) : action à part pour ne plus mêler ses champs à ceux d'un message ; même envoi à Linkivi que show_message.
+COUNTDOWN_TAG = "countdown"   # étiquette par défaut : « Arrêter l'affichage » avec cette étiquette retire le compte à rebours seul
+SHOW_COUNTDOWN_SCHEMA = vol.Schema(
+    {
+        vol.Required("ends_at"): cv.datetime,
+        vol.Optional("title"): vol.All(cv.string, vol.Length(max=60)),
+        vol.Optional("message"): vol.All(cv.string, vol.Length(max=300)),
+        vol.Optional("paused", default=False): cv.boolean,
+        vol.Optional("others", default=0): vol.All(vol.Coerce(int), vol.Range(min=0, max=9)),
+        vol.Optional("ended_message"): vol.All(cv.string, vol.Length(max=300)),
+        vol.Optional("place", default="banner_top"): vol.In(PLACES),
+        vol.Optional("corner", default=CORNERS[0]): vol.In(CORNERS),
+        vol.Optional("wake", default=False): cv.boolean,
+        vol.Optional("tag", default=COUNTDOWN_TAG): vol.All(cv.string, vol.Length(max=40)),
+    },
+    extra=vol.ALLOW_EXTRA,
+)
+
+
+def countdown_data(data: dict) -> dict:
+    """Champs de show_countdown → champs de l'envoi d'un message (message.show)."""
+    title = data.get("title")
+    if not title and not data.get("message"):
+        title = "Minuteur"   # Linkivi veut un titre ou un message
+    return {
+        "title": title,
+        "message": data.get("message"),
+        "place": data.get("place") or "banner_top",
+        "corner": data.get("corner"),
+        "wake": data.get("wake"),
+        "tag": (data.get("tag") or "").strip() or COUNTDOWN_TAG,
+        "countdown_to": data["ends_at"],
+        "paused": data.get("paused"),
+        "more": data.get("others") or 0,
+        "ended_message": data.get("ended_message"),
+    }
+
 
 CLEAR_DISPLAY_SCHEMA = vol.Schema({vol.Optional("tag"): vol.All(cv.string, vol.Length(max=40))}, extra=vol.ALLOW_EXTRA)
 
@@ -156,6 +196,14 @@ async def async_register_services(hass: HomeAssistant) -> None:
 
         await _run(call, send)
 
+    async def show_countdown(call: ServiceCall) -> None:
+        data = countdown_data(dict(call.data))
+
+        async def send(api, screen_id: str) -> None:
+            await show(hass, api, screen_id, data, None)
+
+        await _run(call, send)
+
     async def clear_display(call: ServiceCall) -> None:
         tag = (call.data.get("tag") or "").strip() or None   # seulement les messages de cette étiquette (ex. le minuteur, §344)
 
@@ -217,4 +265,5 @@ async def async_register_services(hass: HomeAssistant) -> None:
     hass.services.async_register(DOMAIN, SERVICE_START_EMERGENCY, start_emergency, schema=START_EMERGENCY_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_END_EMERGENCY, end_emergency, schema=vol.Schema({}))
     hass.services.async_register(DOMAIN, SERVICE_SHOW_MESSAGE, show_message, schema=SHOW_MESSAGE_SCHEMA)
+    hass.services.async_register(DOMAIN, SERVICE_SHOW_COUNTDOWN, show_countdown, schema=SHOW_COUNTDOWN_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_CLEAR_DISPLAY, clear_display, schema=CLEAR_DISPLAY_SCHEMA)

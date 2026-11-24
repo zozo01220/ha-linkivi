@@ -223,22 +223,68 @@
         "tag": {
           "name": "Étiquette",
           "description": "Une nouvelle carte de même étiquette remplace l'ancienne au lieu de s'empiler (ex. sonnette)."
+        }
+      },
+      "sections": {
+        "appearance": {
+          "name": "Apparence"
         },
-        "countdown_to": {
-          "name": "Compte à rebours jusqu'à",
-          "description": "Heure de fin d'un compte à rebours (ex. un minuteur Alexa) : l'écran montre le temps restant, puis clignote en rouge avec le temps écoulé une fois fini. Le message reste alors jusqu'à « Arrêter l'affichage » (au plus une heure après la fin) ; la durée est ignorée."
+        "picture": {
+          "name": "Image ou caméra"
+        },
+        "advanced": {
+          "name": "Avancé"
+        }
+      }
+    },
+    "show_countdown": {
+      "name": "Afficher un compte à rebours",
+      "description": "Affiche le temps restant jusqu'à une heure de fin (minuteur, fin d'un lave-linge…), puis clignote en rouge avec le temps écoulé. Reste affiché jusqu'à « Arrêter l'affichage » (au plus une heure après la fin).",
+      "sections": {
+        "options": {
+          "name": "Options"
+        }
+      },
+      "fields": {
+        "ends_at": {
+          "name": "Heure de fin",
+          "description": "Heure à laquelle le compte à rebours arrive à zéro (dans les 24 h)."
+        },
+        "title": {
+          "name": "Titre",
+          "description": "Jusqu'à 60 caractères. Vide : « Minuteur »."
+        },
+        "message": {
+          "name": "Message",
+          "description": "Sous le titre (ex. l'appareil qui sonne)."
         },
         "paused": {
           "name": "En pause",
-          "description": "Le compte à rebours est en pause : les chiffres restent figés (countdown_to = maintenant + temps restant)."
+          "description": "Chiffres figés : l'heure de fin est alors maintenant + le temps restant."
         },
-        "more": {
-          "name": "Autres comptes à rebours",
-          "description": "Nombre d'autres comptes à rebours en cours : pastille « +1 »."
+        "place": {
+          "name": "Emplacement",
+          "description": "Bandeau du haut (par défaut) ou du bas, plein écran sur fond noir, ou carte dans un coin."
+        },
+        "corner": {
+          "name": "Coin",
+          "description": "Coin de la carte (emplacement Coin)."
         },
         "ended_message": {
           "name": "Texte une fois fini",
-          "description": "Affiché sous le titre quand le compte à rebours est fini (ex. « dites « Alexa, stop » »)."
+          "description": "Affiché sous le titre à zéro (ex. « dites « Alexa, stop » »)."
+        },
+        "others": {
+          "name": "Autres minuteurs",
+          "description": "Nombre d'autres comptes à rebours en cours : pastille « +1 »."
+        },
+        "wake": {
+          "name": "Réveiller l'écran",
+          "description": "Réveille un écran en veille (sinon l'écran en veille refuse)."
+        },
+        "tag": {
+          "name": "Étiquette",
+          "description": "Un nouveau compte à rebours de même étiquette remplace l'ancien ; « Arrêter l'affichage » avec cette étiquette ne retire que lui. Par défaut : countdown."
         }
       }
     },
@@ -248,7 +294,7 @@
       "fields": {
         "tag": {
           "name": "Étiquette",
-          "description": "Ne retire que les messages de cette étiquette (ex. minuteur-alexa) ; vide : tous."
+          "description": "Ne retire que les messages de cette étiquette (ex. countdown pour un compte à rebours) ; vide : tous."
         }
       }
     },
