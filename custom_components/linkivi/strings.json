@@ -119,6 +119,14 @@
       },
       "emergency": {
         "name": "Emergency in progress"
+      },
+      "under_voltage": {
+        "name": "Under-voltage",
+        "state_attributes": {
+          "since_boot": {
+            "name": "Since boot"
+          }
+        }
       }
     },
     "switch": {
@@ -175,6 +183,26 @@
             "name": "Model"
           }
         }
+      },
+      "cpu_temperature": {
+        "name": "CPU temperature"
+      },
+      "disk_used": {
+        "name": "Disk used",
+        "state_attributes": {
+          "free_gb": {
+            "name": "Free space (GB)"
+          },
+          "total_gb": {
+            "name": "Size (GB)"
+          }
+        }
+      },
+      "memory_used": {
+        "name": "Memory used"
+      },
+      "wifi_signal": {
+        "name": "Wi-Fi signal"
       }
     },
     "camera": {

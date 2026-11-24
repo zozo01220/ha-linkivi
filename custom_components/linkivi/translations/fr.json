@@ -119,6 +119,14 @@
       },
       "emergency": {
         "name": "Urgence en cours"
+      },
+      "under_voltage": {
+        "name": "Alimentation insuffisante",
+        "state_attributes": {
+          "since_boot": {
+            "name": "Depuis le démarrage"
+          }
+        }
       }
     },
     "switch": {
@@ -175,6 +183,26 @@
             "name": "Modèle"
           }
         }
+      },
+      "cpu_temperature": {
+        "name": "Température du processeur"
+      },
+      "disk_used": {
+        "name": "Disque utilisé",
+        "state_attributes": {
+          "free_gb": {
+            "name": "Espace libre (Go)"
+          },
+          "total_gb": {
+            "name": "Taille (Go)"
+          }
+        }
+      },
+      "memory_used": {
+        "name": "Mémoire utilisée"
+      },
+      "wifi_signal": {
+        "name": "Signal Wi-Fi"
       }
     },
     "camera": {
