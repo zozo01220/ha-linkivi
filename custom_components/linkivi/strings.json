@@ -138,6 +138,9 @@
       },
       "screen_off": {
         "name": "Put to sleep"
+      },
+      "wake": {
+        "name": "Wake up"
       }
     },
     "select": {

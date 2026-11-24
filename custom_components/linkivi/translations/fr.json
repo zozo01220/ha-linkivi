@@ -138,6 +138,9 @@
       },
       "screen_off": {
         "name": "Mettre en veille"
+      },
+      "wake": {
+        "name": "Réveiller"
       }
     },
     "select": {
