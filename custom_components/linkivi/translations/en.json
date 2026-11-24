@@ -135,6 +135,9 @@
       },
       "power_off": {
         "name": "Power off device"
+      },
+      "screen_off": {
+        "name": "Put to sleep"
       }
     },
     "select": {

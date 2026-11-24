@@ -1,6 +1,6 @@
 # Linkivi pour Home Assistant
 
-[![Version](https://img.shields.io/badge/version-1.15.1-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
+[![Version](https://img.shields.io/badge/version-1.15.2-2a86ee)](https://github.com/zozo01220/ha-linkivi/releases) [![HACS](https://img.shields.io/badge/HACS-d%C3%A9p%C3%B4t%20personnalis%C3%A9-41bdf5)](https://hacs.xyz/) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.11%2B-03a9f4)
 
 Voir et commander ses écrans Linkivi depuis Home Assistant : allumer ou éteindre l'écran, redémarrer le player ou l'appareil, changer la liste diffusée, voir l'aperçu du direct, **y afficher un message** (sonnette, lave-linge terminé…) et déclencher l'**alerte d'urgence**. Une carte « Écrans Linkivi » est fournie pour le tableau de bord. **Neuf blueprints prêts à l'emploi** (sonnette, fin de cycle, fuite → urgence, présence, chien de garde, batterie, Tempo, invités, minuteur Alexa), avec leurs automatisations équivalentes : voir [AUTOMATISATIONS.md](AUTOMATISATIONS.md).
 
@@ -44,6 +44,7 @@ Si Linkivi retire l'accès (clé révoquée ou expirée), Home Assistant demande
 |---|---|---|
 | **En ligne** | capteur binaire | L'écran a donné de ses nouvelles ces 90 dernières secondes. Attributs : état, dernier contact, aire, zone, liste, résolution. |
 | **Écran** | interrupteur | Allumé = éveillé. Éteindre = veille manuelle jusqu'au réveil. Allumer = réveil d'**une heure**, puis les plages de veille et les calendriers reprennent la main (comme « Réveiller » dans Linkivi). Marche aussi quand l'écran est hors ligne : la consigne est lue à son retour. |
+| **Mettre en veille** | bouton | Met l'écran en veille jusqu'au réveil, en un appui (comme éteindre l'interrupteur « Écran »). Tous les écrans. |
 | **Redémarrer le player** | bouton | Relance l'application d'affichage. |
 | **Redémarrer l'appareil** | bouton | Redémarre le PC, le Raspberry Pi ou l'appareil Android. |
 | **Éteindre l'appareil** | bouton | Éteint l'appareil. **Linkivi ne peut pas le rallumer** : il faut le bouton ou le courant. |
@@ -262,6 +263,7 @@ Sans Home Assistant, ces appels servent aussi depuis un script (`curl -H "Author
 
 | Version | Nouveautés |
 |---|---|
+| **1.15.2** | Bouton **Mettre en veille** sur chaque écran (veille jusqu'au réveil, comme l'interrupteur « Écran » éteint). |
 | **1.15.1** | Correctif : la 1.15.0 ne se chargeait pas (« cannot import name SERVICE_SHOW_COUNTDOWN »). |
 | **1.15.0** | **Nouvelle action « Afficher un compte à rebours »** (`show_countdown` : `ends_at`, `paused`, `others`, `ended_message`…) : les champs du minuteur quittent « Afficher un message », qui range les siens en sections repliables (Apparence, Image ou caméra, Avancé). Les automatisations existantes avec `countdown_to` marchent toujours. Le blueprint « Minuteur Alexa sur les écrans » passe à la nouvelle action (il demande donc la 1.15.0). |
 | **1.14.1** | Les actions « Afficher un message » et « Arrêter l'affichage » s'envoient à tous les écrans **en même temps**, et l'ancien emplacement **Bandeau** n'est plus proposé (toujours accepté par les automatisations existantes ; le haut et le bas le remplacent) (avant : l'un après l'autre, donc un minuteur sur plusieurs écrans s'arrêtait avec du retard). |

@@ -1,4 +1,4 @@
-"""Redémarrer le player, redémarrer l'appareil, éteindre l'appareil."""
+"""Redémarrer le player, redémarrer l'appareil, éteindre l'appareil, mettre l'écran en veille."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .api import LinkivError
-from .const import CMD_POWER_OFF, CMD_REBOOT, CMD_RESTART_PLAYER
+from .const import CMD_POWER_OFF, CMD_REBOOT, CMD_RESTART_PLAYER, CMD_SCREEN_OFF
 from .entity import LinkivEntity, add_new_screens
 
 # La clé de chaque bouton est la commande de l'API ; le bouton n'existe que si le matériel de l'écran la sait faire
@@ -18,6 +18,8 @@ BUTTONS: tuple[ButtonEntityDescription, ...] = (
     ButtonEntityDescription(key=CMD_RESTART_PLAYER, translation_key="restart_player", device_class=ButtonDeviceClass.RESTART),
     ButtonEntityDescription(key=CMD_REBOOT, translation_key="reboot", device_class=ButtonDeviceClass.RESTART),
     ButtonEntityDescription(key=CMD_POWER_OFF, translation_key="power_off"),
+    # veille jusqu'au réveil (§348) : tous les écrans ; même commande que l'interrupteur « Écran » éteint, en un appui pour les tableaux de bord
+    ButtonEntityDescription(key=CMD_SCREEN_OFF, translation_key="screen_off", icon="mdi:power-sleep"),
 )
 
 

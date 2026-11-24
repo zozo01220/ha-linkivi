@@ -135,6 +135,9 @@
       },
       "power_off": {
         "name": "Éteindre l'appareil"
+      },
+      "screen_off": {
+        "name": "Mettre en veille"
       }
     },
     "select": {
