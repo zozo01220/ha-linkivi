@@ -266,7 +266,11 @@
         },
         "live": {
           "name": "Image en direct",
-          "description": "L'image de la caméra est rafraîchie toutes les 2 secondes pendant l'affichage (mention « En direct »)."
+          "description": "L'image de la caméra est rafraîchie pendant l'affichage (mention « En direct »)."
+        },
+        "live_interval": {
+          "name": "Actualiser toutes les",
+          "description": "Avec « Image en direct » : nombre de secondes entre deux images de la caméra (2 à 60)."
         },
         "tag": {
           "name": "Étiquette",

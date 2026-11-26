@@ -1,7 +1,7 @@
 """Envoi d'un message à un écran (§309) : image d'une caméra ou d'une adresse lue ici, dans Home Assistant, puis envoyée à Linkivi.
 
 L'écran ne contacte jamais la caméra ni l'adresse : il reçoit l'image de Linkivi. Avec « live », l'image d'une caméra est relue et renvoyée
-toutes les 2 s tant que le message est affiché. Utilisé par l'action show_message, l'entité de notification et les actions d'appareil.
+toutes les 2 s (réglable : « live_interval ») tant que le message est affiché. Utilisé par l'action show_message, l'entité de notification et les actions d'appareil.
 """
 
 from __future__ import annotations
@@ -105,15 +105,17 @@ async def show(
     notice_id = res.get("noticeId")
     if image and notice_id and data.get("live") and data.get("camera"):
         seconds = data.get("duration") or DEFAULT_SECONDS.get(place, 30)
-        hass.async_create_background_task(_live(hass, api, screen_id, str(notice_id), data["camera"], seconds), f"linkivi_live_{notice_id}")
+        every = max(LIVE_IMAGE_SECONDS, int(data.get("live_interval") or LIVE_IMAGE_SECONDS))
+        hass.async_create_background_task(_live(hass, api, screen_id, str(notice_id), data["camera"], seconds, every), f"linkivi_live_{notice_id}")
 
 
-async def _live(hass: HomeAssistant, api: Any, screen_id: str, notice_id: str, camera: str, seconds: int) -> None:
-    """Image « En direct » : relue et renvoyée toutes les 2 s jusqu'à la fin du message (ou dès que Linkivi dit qu'il n'est plus affiché)."""
+async def _live(hass: HomeAssistant, api: Any, screen_id: str, notice_id: str, camera: str, seconds: int, every: int = LIVE_IMAGE_SECONDS) -> None:
+    """Image « En direct » : relue et renvoyée toutes les « every » secondes (2 par défaut, live_interval) jusqu'à la fin du message
+    (ou dès que Linkivi dit qu'il n'est plus affiché)."""
     loop = asyncio.get_running_loop()
     end = loop.time() + seconds
-    while loop.time() + LIVE_IMAGE_SECONDS < end:
-        await asyncio.sleep(LIVE_IMAGE_SECONDS)
+    while loop.time() + every < end:
+        await asyncio.sleep(every)
         try:
             await api.display_image(screen_id, notice_id, await camera_image(hass, camera))
         except LinkivError:

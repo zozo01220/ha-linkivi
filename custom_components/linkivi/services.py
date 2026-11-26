@@ -19,6 +19,7 @@ from .mediaplayer import now_playing
 from .message import read_image, show
 from .const import (
     DOMAIN,
+    LIVE_IMAGE_SECONDS,
     CORNERS,
     LOOKS,
     PLACES,
@@ -50,6 +51,7 @@ SHOW_MESSAGE_SCHEMA = vol.All(
             vol.Optional("camera"): cv.entity_id,
             vol.Optional("image_url"): cv.url,
             vol.Optional("live", default=False): cv.boolean,
+            vol.Optional("live_interval", default=LIVE_IMAGE_SECONDS): vol.All(vol.Coerce(int), vol.Range(min=LIVE_IMAGE_SECONDS, max=60)),   # image en direct relue toutes les N s
             vol.Optional("tag"): vol.All(cv.string, vol.Length(max=40)),
             # compte à rebours (§344) : toujours accepté ici pour les automatisations d'avant la 1.15, mais masqué dans l'éditeur ;
             # l'action show_countdown (§347) le remplace

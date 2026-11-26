@@ -67,7 +67,7 @@ LOOKS = ["information", "attention"]
 PLACES = ["full", "banner", "banner_top", "banner_bottom", "corner"]
 PLACES_SHOWN = ["full", "banner_top", "banner_bottom", "corner"]
 CORNERS = ["bottom_right", "bottom_left", "top_right", "top_left"]
-# Image « En direct » d'une caméra : nouvelle image toutes les 2 s pendant l'affichage.
+# Image « En direct » d'une caméra : nouvelle image toutes les 2 s par défaut (réglable de 2 à 60 s : live_interval).
 LIVE_IMAGE_SECONDS = 2
 MAX_IMAGE_BYTES = 3_000_000
 

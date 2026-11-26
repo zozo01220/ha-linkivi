@@ -63,6 +63,14 @@ show_message:
           default: false
           selector:
             boolean:
+        live_interval:
+          default: 2
+          selector:
+            number:
+              min: 2
+              max: 60
+              unit_of_measurement: s
+              mode: box
     advanced:
       collapsed: true
       fields:

@@ -266,7 +266,11 @@
         },
         "live": {
           "name": "Live picture",
-          "description": "The camera picture is refreshed every 2 seconds while the message is shown (\"Live\" label)."
+          "description": "The camera picture is refreshed while the message is shown (\"Live\" label)."
+        },
+        "live_interval": {
+          "name": "Refresh every",
+          "description": "With Live picture: seconds between two camera pictures (2 to 60)."
         },
         "tag": {
           "name": "Tag",
