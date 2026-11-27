@@ -57,6 +57,7 @@ blueprint:
       name: Rouge à la fin, au plus
       description: >-
         Si Alexa Media Player retire le minuteur dès qu'il sonne (sans attendre « Alexa, stop »), le rouge reste ce temps-là.
+        Il s'efface aussitôt dès qu'on parle à cette Alexa (« Alexa, stop »).
       default:
         minutes: 1
       selector:
@@ -77,6 +78,9 @@ variables:
   place: !input place
   ring_full: !input ring_full
   alexa_name: !input alexa_name
+  # l'Echo du minuteur (même appareil que le capteur) : on regarde quand on lui a parlé pour la dernière fois (« Alexa, stop »)
+  echo: >-
+    {% set d = device_id(timer) %}{{ (device_entities(d) | select('match', 'media_player\.') | first | default('')) if d else '' }}
   brief: "{{ state_attr(timer, 'brief') }}"
   active: "{{ brief.active if brief is mapping and brief.active is defined and brief.active is iterable else [] }}"
   running: "{{ (states(timer) | as_datetime(None)) is not none or (active | count) > 0 }}"
@@ -137,10 +141,14 @@ actions:
     default:
       # plus de minuteur : « Alexa, stop », annulé, ou retiré dès la sonnerie (on garde alors le rouge un moment)
       - variables:
+          # on vient de parler à l'Alexa (moins de 15 s) : c'est « Alexa, stop », pas un retrait automatique à la sonnerie
+          spoke: >-
+            {% set t = state_attr(echo, 'last_called_timestamp') | int(0) if echo else 0 %}
+            {{ t > 0 and ((now().timestamp() * 1000 - t) | abs) < 15000 }}
           rang: >-
             {% set e = trigger.from_state.state | as_datetime(None) if trigger.platform == 'state' and trigger.from_state is not none else none %}
             {{ e is not none and ((now() - e).total_seconds() | abs) < 20 }}
-      - if: "{{ rang }}"
+      - if: "{{ rang and not spoke }}"
         then:
           - if: "{{ ring_full and place != 'full' }}"
             then:
@@ -154,7 +162,11 @@ actions:
                   ends_at: "{{ trigger.from_state.state }}"
                   ended_message: !input ended
                   tag: minuteur-alexa
-          - delay: !input keep
+          # le rouge reste « keep » au plus, et s'efface dès qu'on parle à l'Alexa
+          - variables:
+              called0: "{{ state_attr(echo, 'last_called_timestamp') if echo else none }}"
+          - wait_template: "{{ echo != '' and state_attr(echo, 'last_called_timestamp') != called0 }}"
+            timeout: !input keep
       - action: linkivi.clear_display
         continue_on_error: true
         target: !input screens

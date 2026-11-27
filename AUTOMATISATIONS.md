@@ -367,7 +367,7 @@ actions:
           tag: minuteur-alexa
 ```
 
-Le blueprint fait la même chose en plus complet : nom donné au minuteur (« minuteur pâtes »), pause, « +1 » quand il y en a plusieurs, rien de renvoyé quand seule l'heure du relevé change, et rouge gardé un moment si Alexa Media Player retire le minuteur dès qu'il sonne.
+Le blueprint fait la même chose en plus complet : nom donné au minuteur (« minuteur pâtes »), pause, « +1 » quand il y en a plusieurs, rien de renvoyé quand seule l'heure du relevé change, et rouge gardé un moment si Alexa Media Player retire le minuteur dès qu'il sonne. Ce rouge s'efface aussitôt quand on parle à cette Alexa : le blueprint retrouve l'Echo du capteur et regarde son attribut `last_called_timestamp` (« Alexa, stop » dit juste après la sonnerie n'attend plus la fin de « Rouge à la fin, au plus »).
 
 **Les champs de « Afficher un compte à rebours »** (1.15.0, utilisables pour tout compte à rebours : minuteur Home Assistant, fin d'un lave-linge…)
 - `place: banner_top` ou `banner_bottom` : le bandeau du haut ou du bas, pris ou ajouté le temps du message ; `place: full` : plein écran sur fond noir (gros chiffres), le contenu est masqué pendant le minuteur ;
@@ -375,7 +375,7 @@ Le blueprint fait la même chose en plus complet : nom donné au minuteur (« mi
 - `paused` : chiffres figés (`ends_at` = maintenant + temps restant) ; `others` : pastille « +1 » ; `ended_message` : le texte une fois fini ;
 - « Arrêter l'affichage » avec `tag` : ne retire que les messages de cette étiquette (une sonnette affichée en même temps reste).
 
-Un autre message « en bandeau » arrivé pendant le minuteur passe devant ; le minuteur revient à sa fin.
+**Priorité à l'écran** (serveur Linkivi, §355) : urgence, puis caméra et messages libres, puis minuteur, puis musique. Une caméra arrivée pendant le minuteur passe devant ; le minuteur attend derrière et revient à sa fin ; s'il sonne pendant ce temps, une pastille rouge « Minuteur terminé » s'affiche sur la caméra. « Alexa, stop » le retire même caché. La musique, elle, attend derrière le minuteur.
 
 **Où afficher le minuteur (blueprint, 1.14.0).** Le champ « Où afficher le minuteur » propose Bandeau du haut (défaut, comme avant), Bandeau du bas ou Plein écran, fond noir ; une automatisation par Alexa, donc « Alexa cuisine → plein écran sur l'écran de la cuisine » et « Alexa séjour → bandeau du haut sur le salon » vivent côte à côte. L'option « Plein écran à la sonnerie seulement » garde un bandeau pendant le décompte et passe en plein écran rouge clignotant à zéro. L'alerte d'urgence passe toujours devant le minuteur, qui revient ensuite. Les automatisations créées avant la 1.14.0 gardent le bandeau du haut sans rien changer.
 
